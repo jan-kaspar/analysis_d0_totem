@@ -1,0 +1,7 @@
+#!/bin/bash
+
+
+for model in "e012+e012" "e012+e012_t_0" "e012+e02" "e012+e012_t_dip" "e01-int-e01"
+do
+	cp "fits/$model/summary/summary.pdf" "$HOME/send/summary_$model.pdf"
+done

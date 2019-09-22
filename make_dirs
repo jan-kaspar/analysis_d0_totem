@@ -1,0 +1,27 @@
+#!/bin/bash
+
+
+for model in "e012+e012" "e012+e012_t_0" "e012+e02" "e012+e012_t_dip" "e01-int-e01"
+do
+	dir="fits/$model"
+
+	mkdir -p "$dir"
+
+	(
+		echo "#!/bin/bash"
+		echo "model=\"$model\""
+		echo "make -C ../../ -j2 || exit 1"
+		echo "../../do_fits -model \"$model\" &> \"do_fits.log\" || exit 2"
+		echo "../../s_extrapolation -model \"$model\" &> "s_extrapolation.log" || exit 3"
+	) > "$dir/run"
+
+	chmod u+x "$dir/run"
+
+	mkdir -p "$dir/plots"
+	cd "$dir/plots/"
+	for f in ../../../plots/dip/*.asy
+	do
+		ln -s $f
+	done
+	cd - &> /dev/null
+done

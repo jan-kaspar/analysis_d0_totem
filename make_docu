@@ -1,0 +1,17 @@
+#!/bin/bash
+
+
+for model in "e012+e012" "e012+e012_t_0" "e012+e02" "e012+e012_t_dip" "e01-int-e01"
+do
+	dir="fits/$model"
+
+	echo "* $dir"
+
+	cd "$dir/plots"
+	asy *.asy &> /dev/null
+	cd - &> /dev/null
+
+	cd "$dir/summary"
+	pdftex -fmt=encpdftex "summary.tex" &> /dev/null
+	cd - &> /dev/null
+done

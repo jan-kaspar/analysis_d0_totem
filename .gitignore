@@ -1,0 +1,12 @@
+*.root
+*.pdf
+*.log
+.*
+
+!.gitignore
+
+fits*
+
+do_fits
+process_input
+s_extrapolation
