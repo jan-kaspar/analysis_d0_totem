@@ -1,3 +1,6 @@
+# columns 1 to 3: |t|_min, |t|_max, |t|_repr
+# columns 4 to 6: dsigma/dt in mb/GeV^2, value, statistical unc., t-dependent systematic unc.
+# t-independent uncertainty (normalisation): 5.5 %
 0.0376251514		   0.0392627766		  0.0383985046		  291.0051440508		  0.2375328642		  23.2262105797 
 0.0392627766		   0.0409020393		  0.0400368711		  280.1016141529		  0.2189373567		  17.0984696477 
 0.0409020393		   0.0425429414		  0.0416768613		  270.2528944052		  0.2076223790		  13.4478908186 
