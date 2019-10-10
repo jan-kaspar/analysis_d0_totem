@@ -1,6 +1,8 @@
 #include "TFile.h"
 #include "TGraphErrors.h"
+#include "TF1.h"
 #include "TMatrixDSym.h"
+#include "TVectorD.h"
 
 #include <cstdio>
 
@@ -13,51 +15,100 @@ using namespace std;
 int main()
 {
 	// get input
-	FILE *f_in = fopen("final_TOTEM_2p76TeV_13sigma_elastic_cross_section.txt", "r");
+	FILE *f_in = fopen("from_preprint_13sigma.txt", "r");
 
 	// prepare output
 	TFile *f_out = TFile::Open("data.root", "recreate");
 
 	TGraphErrors *g_dsdt = new TGraphErrors();
 
-	TGraphErrors *g_dsdt_syst_unc = new TGraphErrors();
+	TGraphErrors *g_dsdt_syst_unc_t_dep = new TGraphErrors();
 
 	// process input
 	while (!feof(f_in))
 	{
-		float t_min, t_max, t_cen, dsdt, dsdt_unc;
-		int r = fscanf(f_in, "%f %f %f %f %f", &t_min, &t_max, &t_cen, &dsdt, &dsdt_unc);
+		char line[500];
+		char *ret = fgets(line, 500, f_in);
 
-		if (r == 5)
+		if (ret == NULL)
+			break;
+
+		if (line[0] == '#')
+			continue;
+
+		float t_min, t_max, t_repr, dsdt, dsdt_stat_unc, dsdt_syst_unc_t_dep;
+		int r = sscanf(line, "%f %f %f %f %f %f", &t_min, &t_max, &t_repr, &dsdt, &dsdt_stat_unc, &dsdt_syst_unc_t_dep);
+
+		if (r == 6)
 		{
-			double t_unc = (t_max - t_min) / 2.;
+			const double t_unc = (t_max - t_min) / 2.;
 
 			int idx = g_dsdt->GetN();
-			g_dsdt->SetPoint(idx, t_cen, dsdt);
-			g_dsdt->SetPointError(idx, t_unc, dsdt_unc);
+			g_dsdt->SetPoint(idx, t_repr, dsdt);
+			g_dsdt->SetPointError(idx, t_unc, dsdt_stat_unc);
 
-			g_dsdt_syst_unc->SetPoint(idx, 0., 0.);
+			g_dsdt_syst_unc_t_dep->SetPoint(idx, 0., dsdt_syst_unc_t_dep);
+
+			//printf("%i, %f, %f\n", idx, t_repr, dsdt);
 		}
 	}
 
+	// make fit
+	TF1 *ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x + [3]*x*x*x) + exp([4] + [5]*x + [6]*x*x + [7]*x*x*x)");
+	ff->SetParameters(
+		6.75, -19.3, 0., 0.,
+		-116., 319., -228., 0.
+	);
+	ff->FixParameter(2, 0.);
+	ff->FixParameter(3, 0.);
+	ff->FixParameter(7, 0.);
+	ff->SetRange(0.35, 0.9);
+
+	g_dsdt->Fit(ff, "", "", 0.35, 0.8);
+
 	g_dsdt->Write("g_dsdt");
+	ff->Write("f_dsdt");
 
-	// make systematic-uncertainty matrices
-	const int dim = g_dsdt_syst_unc->GetN();
+	// make systematic-uncertainty objects
+	const int dim = g_dsdt_syst_unc_t_dep->GetN();
 
-	TMatrixDSym m_dsdt_cov_syst_full(dim), m_dsdt_cov_syst_no_norm(dim);
+	TMatrixDSym m_dsdt_cov_syst_t_dep(dim);
 
-	// TODO: improve, for the moment just an uncorrelated simplification
 	for (int i = 0; i < dim; ++i)
 	{
-		const double unc = g_dsdt_syst_unc->GetY()[i];
+		const double unc = g_dsdt_syst_unc_t_dep->GetY()[i];
 
-		m_dsdt_cov_syst_no_norm(i, i) = 0.;
-		m_dsdt_cov_syst_full(i, i) = unc * unc;
+		m_dsdt_cov_syst_t_dep(i, i) = unc * unc; // for the moment uncorrelated approximation
 	}
 
-	m_dsdt_cov_syst_full.Write("m_dsdt_cov_syst_full");
-	m_dsdt_cov_syst_no_norm.Write("m_dsdt_cov_syst_no_norm");
+	m_dsdt_cov_syst_t_dep.Write("m_dsdt_cov_syst_t_dep");
+
+	const double rel_syst_t_indep = 0.060;
+
+	TVectorD v_rel_syst_t_indep(1);
+	v_rel_syst_t_indep(0) = rel_syst_t_indep;
+	v_rel_syst_t_indep.Write("v_rel_syst_t_indep");
+
+	TVectorD v_dsdt_syst_t_indep(dim);
+
+	TGraph *g_dsdt_syst_t_dep = new TGraph();
+	TGraph *g_dsdt_syst_t_indep = new TGraph();
+	TGraph *g_dsdt_syst_full = new TGraph();
+
+	for (int i = 0; i < dim; ++i)
+	{
+		double t = g_dsdt->GetX()[i];
+
+		v_dsdt_syst_t_indep(i) = (t < 1.0) ? rel_syst_t_indep * ff->Eval(t) : 0.;
+
+		g_dsdt_syst_t_dep->SetPoint(i, t, sqrt(m_dsdt_cov_syst_t_dep(i, i)));
+		g_dsdt_syst_t_indep->SetPoint(i, t, v_dsdt_syst_t_indep(i));
+		g_dsdt_syst_full->SetPoint(i, t, sqrt(m_dsdt_cov_syst_t_dep(i, i) + pow(v_dsdt_syst_t_indep(i), 2)));
+	}
+
+	g_dsdt_syst_t_dep->Write("g_dsdt_syst_t_dep");
+	g_dsdt_syst_t_indep->Write("g_dsdt_syst_t_indep");
+	g_dsdt_syst_full->Write("g_dsdt_syst_full");
 
 	// clean up
 	fclose(f_in);
