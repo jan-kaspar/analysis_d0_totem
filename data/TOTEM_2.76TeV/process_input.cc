@@ -106,6 +106,8 @@ int main()
 		g_dsdt_syst_full->SetPoint(i, t, sqrt(m_dsdt_cov_syst_t_dep(i, i) + pow(v_dsdt_syst_t_indep(i), 2)));
 	}
 
+	v_dsdt_syst_t_indep.Write("v_dsdt_syst_t_indep");
+
 	g_dsdt_syst_t_dep->Write("g_dsdt_syst_t_dep");
 	g_dsdt_syst_t_indep->Write("g_dsdt_syst_t_indep");
 	g_dsdt_syst_full->Write("g_dsdt_syst_full");
