@@ -28,6 +28,9 @@ int main()
 		const double dsdt = h_in->GetBinContent(bi);
 		const double dsdt_stat_unc = h_in->GetBinError(bi);
 
+		if (t < 0.03 || t > 1.8)
+			continue;
+
 		int idx = g_dsdt->GetN();
 		g_dsdt->SetPoint(idx, t, dsdt);
 		g_dsdt->SetPointError(idx, t_unc, dsdt_stat_unc);
