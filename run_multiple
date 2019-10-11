@@ -1,0 +1,54 @@
+#!/bin/bash
+
+models=(
+	"e012+e012"
+	#"e012+e012_t_0"
+	#"e012+e02"
+	#"e012+e012_t_dip"
+	#"e01-int-e01"
+)
+
+t_ranges=(
+	"first"
+)
+
+uncs=(
+	"st"
+	"st+sy"
+	"st+sy+no"
+)
+
+#----------------------------------------------------------------------------------------------------
+
+function RunOne()
+{
+	local dir="$1"
+
+	echo "* $dir"
+
+	mkdir -p "$dir"
+
+	cd "$dir"
+
+	../../../../do_fits -model "$model" -range "$t_range" -unc "$unc" &> "do_fits.log"
+	../../../../s_extrapolation -model "$model" -range "$t_range" &> "s_extrapolation.log"
+
+	cd - &> /dev/null
+}
+
+#----------------------------------------------------------------------------------------------------
+
+make -j2 || exit 1
+
+for model in ${models[*]}
+do
+	for t_range in ${t_ranges[*]}
+	do
+		for unc in ${uncs[*]}
+		do
+			dir="fits/$model/$t_range/$unc"
+
+			RunOne "$dir" &
+		done
+	done
+done
