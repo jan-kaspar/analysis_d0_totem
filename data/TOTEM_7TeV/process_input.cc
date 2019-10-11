@@ -18,7 +18,8 @@ int main()
 	
 	// systematic error data
 	double syst_unc_t[] = { 0.4, 0.5, 1.5 };
-	double syst_unc_val[] = { +29.0, +31.6, +26.3 };
+	//double syst_unc_val[] = { +29.0, +31.6, +26.3 };
+	double syst_unc_val[] = { +13.0, +13.0, +13.0 }; // temporarily use more reasonable numbers
 	TGraph *g_rel_syst_unc_t_dep = new TGraph(3, syst_unc_t, syst_unc_val);
 
 	// prepare output
@@ -72,7 +73,8 @@ int main()
 
 	m_dsdt_cov_syst_t_dep.Write("m_dsdt_cov_syst_t_dep");
 
-	const double rel_syst_t_indep = 0.11;
+	//const double rel_syst_t_indep = 0.11;
+	const double rel_syst_t_indep = 0.27; // temporarily use more reasonable numbers
 
 	TVectorD v_rel_syst_t_indep(1);
 	v_rel_syst_t_indep(0) = rel_syst_t_indep;
