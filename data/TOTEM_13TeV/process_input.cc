@@ -28,7 +28,10 @@ int main()
 	while (!feof(f_in))
 	{
 		char line[500];
-		fgets(line, 500, f_in);
+		char *ret = fgets(line, 500, f_in);
+
+		if (ret == NULL)
+			break;
 
 		if (line[0] == '#')
 			continue;
