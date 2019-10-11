@@ -163,6 +163,7 @@ const unsigned int n_points = 200;
 
 void SaveExtrapolation(const ROOT::Fit::FitResult &result, const string &extrapolationModel, const Dataset &ds)
 {
+	// calculate extrapolated parameters
 	const double *par = result.GetParams();
 
 	TVectorD a(n_parameters), b(n_parameters);
@@ -174,9 +175,11 @@ void SaveExtrapolation(const ROOT::Fit::FitResult &result, const string &extrapo
 
 	TVectorD p = EvaluateParameters(a, b, ds_ext.sqrt_s, extrapolationModel);
 
+	// set extrapolated parameters to fit function
 	for (int i = 0; i < n_parameters; ++i)
 		ds.ff->SetParameter(i, p(i));
 
+	// evaluate extrapolated graph
 	TGraph *g_dsdt_ext = new TGraph(); g_dsdt_ext->SetName("g_dsdt_ext");
 
 	for (unsigned int i = 0; i < n_points; ++i)
@@ -189,6 +192,82 @@ void SaveExtrapolation(const ROOT::Fit::FitResult &result, const string &extrapo
 	}
 
 	g_dsdt_ext->Write();
+
+	// prepare pertubation generator matrix
+	int dim = result.NPar();
+	TMatrixDSym V(dim);
+	for (int i = 0; i < dim; ++i)
+		for (int j = 0; j < dim; ++j)
+			V(i, j) = result.CovMatrix(i, j);
+
+	TMatrixDSymEigen eig_decomp(V);
+	TVectorD eig_values(eig_decomp.GetEigenValues());
+	TMatrixDSym S(V.GetNrows());
+	for (int i = 0; i < V.GetNrows(); i++)
+		S(i, i) = (eig_values(i) >= 0.) ? sqrt(eig_values(i)) : 0.;
+	TMatrixD m_gen = eig_decomp.GetEigenVectors() * S;
+
+	// uncertainty band
+	const unsigned int n_repetitions = 100;
+	vector<Stat> stat(n_points, Stat(1));
+
+	for (unsigned int ir = 0; ir < n_repetitions; ++ir)
+	{
+		// generate biased extrapolation
+		TVectorD delta(V.GetNrows()), rdm(V.GetNrows());
+		for (int i = 0; i < V.GetNrows(); i++)
+			rdm(i) = gRandom->Gaus();
+		delta = m_gen * rdm;
+
+		TVectorD a_mod(n_parameters), b_mod(n_parameters);
+		for (int i = 0; i < n_parameters; ++i)
+		{
+			a_mod(i) = par[i] + delta(i);
+			b_mod(i) = par[n_parameters + i] + delta(n_parameters + i);
+		}
+
+		TVectorD p_mod = EvaluateParameters(a_mod, b_mod, ds_ext.sqrt_s, extrapolationModel);
+
+		// set extrapolated parameters to fit function
+		TF1 *ff_mod = new TF1(*ds.ff);
+
+		for (int i = 0; i < n_parameters; ++i)
+			ff_mod->SetParameter(i, p_mod(i));
+
+		// sample biased extrapolation
+		for (int i = 0; i < g_dsdt_ext->GetN(); ++i)
+		{
+			const double t = g_dsdt_ext->GetX()[i];
+			const double f_dsdt_mod = ff_mod->Eval(t);
+
+			stat[i].Fill(f_dsdt_mod);
+		}
+
+		// clean up
+		delete ff_mod;
+	}
+
+	// build graphs
+	TGraph *g_dsdt_ext_unc = new TGraph();
+	TGraph *g_dsdt_ext_pl_unc = new TGraph();
+	TGraph *g_dsdt_ext_mi_unc = new TGraph();
+
+	for (int i = 0; i < g_dsdt_ext->GetN(); ++i)
+	{
+		const double t = g_dsdt_ext->GetX()[i];
+		const double f_dsdt = g_dsdt_ext->GetY()[i];
+
+		const double f_unc = stat[i].GetStdDev(0);
+
+		int idx = g_dsdt_ext_unc->GetN();
+		g_dsdt_ext_unc->SetPoint(idx, t, f_unc);
+		g_dsdt_ext_pl_unc->SetPoint(idx, t, f_dsdt + f_unc);
+		g_dsdt_ext_mi_unc->SetPoint(idx, t, f_dsdt - f_unc);
+	}
+
+	g_dsdt_ext_unc->Write("g_dsdt_ext_unc");
+	g_dsdt_ext_pl_unc->Write("g_dsdt_ext_pl_unc");
+	g_dsdt_ext_mi_unc->Write("g_dsdt_ext_mi_unc");
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -205,6 +284,7 @@ void PrintUsage()
 int main(int argc, const char **argv)
 {
 	// defaults
+	string tRange = "";
 	string fitModel = "";
 
 	// parse command line
@@ -216,6 +296,7 @@ int main(int argc, const char **argv)
 			continue;
 		}
 
+		if (TestStringParameter(argc, argv, argi, "-range", tRange)) continue;
 		if (TestStringParameter(argc, argv, argi, "-model", fitModel)) continue;
 		
 		printf("ERROR: unknown option '%s'.\n", argv[argi]);
@@ -229,15 +310,16 @@ int main(int argc, const char **argv)
 	}
 
 	// input validation
-	if (fitModel == "")
+	if (tRange == "" || fitModel == "")
 	{
-		printf("ERROR: fit model not set.\n");
+		printf("ERROR: some mandatory input not provided.\n");
 		PrintUsage();
 	}
 
 	// prepare datasets
 	InitDatasets();
 
+	BuildTRanges(tRange, ds_ext);
 	BuildFitFunction(fitModel, ds_ext);
 
 	// get input
