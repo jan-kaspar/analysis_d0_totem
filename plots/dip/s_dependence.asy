@@ -5,6 +5,8 @@ include common_code;
 
 string f = topDir + "s_extrapolation.root";
 
+TGraph_errorBar = None;
+
 //----------------------------------------------------------------------------------------------------
 
 RootObject g_settings = RootGetObject(f, "g_settings");
@@ -61,3 +63,7 @@ for (int pari = 0; pari < n_parameters; ++pari)
 		}
 	}
 }
+
+//----------------------------------------------------------------------------------------------------
+
+GShipout(hSkip=1mm, vSkip=1mm);

@@ -78,3 +78,5 @@ for (int dsi : datasets.keys)
 		AttachLegend();
 	}
 }
+
+GShipout(hSkip=1mm);

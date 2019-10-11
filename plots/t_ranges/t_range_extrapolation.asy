@@ -47,3 +47,5 @@ for (int mi : methods.keys)
 		AttachLegend();
 	}
 }
+
+GShipout(hSkip=1mm);

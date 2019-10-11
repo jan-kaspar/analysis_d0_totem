@@ -51,6 +51,10 @@ for (int pari = 0; pari < n_parameters; ++pari)
 
 		draw(g_fit, "l", red);
 
-		AttachLegend();
+		//AttachLegend();
 	}
 }
+
+//----------------------------------------------------------------------------------------------------
+
+GShipout(hSkip=1mm, vSkip=1mm);

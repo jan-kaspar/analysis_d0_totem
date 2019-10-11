@@ -78,3 +78,5 @@ for (int mi : methods.keys)
 		limits((t_min-0.05, dsdt_dip*0.7), (t_max+0.05, dsdt_min*1.5), Crop);
 	}
 }
+
+GShipout(hSkip=1mm);

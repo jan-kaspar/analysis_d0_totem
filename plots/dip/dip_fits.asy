@@ -74,7 +74,8 @@ for (int dsi : datasets.keys)
 	RootObject g_data = RootGetObject(f, datasets[dsi] + "/g_data");
 
 	RootObject g_dsdt = RootGetObject(f, datasets[dsi] + "/g_dsdt");
-	RootObject g_dsdt_syst = RootGetObject(f, datasets[dsi] + "/g_dsdt_unc_syst_full");
+	RootObject g_dsdt_syst_t_dep = RootGetObject(f, datasets[dsi] + "/g_dsdt_unc_syst_t_dep");
+	RootObject g_dsdt_syst_full = RootGetObject(f, datasets[dsi] + "/g_dsdt_unc_syst_full");
 
 	RootObject g_fit = RootGetObject(f, datasets[dsi] + "/g_fit");
 	RootObject g_fit_pl_unc = RootGetObject(f, datasets[dsi] + "/g_fit_pl_unc");
@@ -92,13 +93,16 @@ for (int dsi : datasets.keys)
 	TGraph_x_min = t_min;
 	TGraph_x_max = t_max;
 
-	DrawUncBand(g_dsdt, g_dsdt_syst, yellow);
+	DrawUncBand(g_dsdt, g_dsdt_syst_full, yellow);
+	DrawUncBand(g_dsdt, g_dsdt_syst_t_dep, heavygreen);
 
 	draw(g_fit_pl_unc, "l", red+dashed);
 	draw(g_fit_mi_unc, "l", red+dashed);
 	draw(g_fit, "l", red+1pt);
 
 	draw(g_dsdt, "p", blue, mCi+0.5pt);
+
+	limits((0.4, 4e-3), (0.8, 1e-1), Crop);
 
 	AddToLegend("$\ch^2/ndf = " + format("%.1f / (", chi2) + format("%.0f", n_fit_points) + format(" - %.0f)", n_fit_points - ndf) + format(" = %.1f$", chi2_ndf));
 
@@ -114,7 +118,8 @@ for (int dsi : datasets.keys)
 	RootObject g_data = RootGetObject(f, datasets[dsi] + "/g_data");
 
 	RootObject g_dsdt = RootGetObject(f, datasets[dsi] + "/g_dsdt");
-	RootObject g_dsdt_syst = RootGetObject(f, datasets[dsi] + "/g_dsdt_unc_syst_full");
+	RootObject g_dsdt_syst_t_dep = RootGetObject(f, datasets[dsi] + "/g_dsdt_unc_syst_t_dep");
+	RootObject g_dsdt_syst_full = RootGetObject(f, datasets[dsi] + "/g_dsdt_unc_syst_full");
 
 	RootObject g_fit = RootGetObject(f, datasets[dsi] + "/g_fit");
 	RootObject g_fit_pl_unc = RootGetObject(f, datasets[dsi] + "/g_fit_pl_unc");
@@ -126,7 +131,8 @@ for (int dsi : datasets.keys)
 
 	NewPad("$|t|\ung{GeV^2}$", "$(\d\si/\d t - \hbox{fit}) / \hbox{fit}$");
 
-	DrawRelUncBand(g_dsdt, g_dsdt_syst, g_fit, yellow);
+	DrawRelUncBand(g_dsdt, g_dsdt_syst_full, g_fit, yellow);
+	DrawRelUncBand(g_dsdt, g_dsdt_syst_t_dep, g_fit, heavygreen);
 
 	for (int i = 0; i < g_dsdt.iExec("GetN"); ++i)
 	{
@@ -165,4 +171,10 @@ for (int dsi : datasets.keys)
 	draw(gr_fit, red+1pt);
 	draw(gr_fit_pl_unc, red+dashed);
 	draw(gr_fit_mi_unc, red+dashed);
+
+	xlimits(0.4, 0.8, Crop);
 }
+
+//----------------------------------------------------------------------------------------------------
+
+GShipout(hSkip=1mm, vSkip=1mm);
