@@ -25,44 +25,30 @@ Dataset ds_ext;
 
 void InitDatasets()
 {
+	string topDir = "../../../../data/";
+
 	Dataset d2;
 	d2.sqrt_s = 2.76;
 	d2.name = "2.76TeV";
-	d2.f_in = "../../data/TOTEM_2.76TeV/data.root";
-	d2.t_min = 0.48;
-	d2.t_dip = 0.615;
-	d2.t_bmp = 0.7;
-	d2.t_max = 0.77;
+	d2.f_in = topDir + "TOTEM_2.76TeV/data.root";
 	datasets.push_back(d2);
 
 	Dataset d7;
 	d7.sqrt_s = 7.;
 	d7.name = "7TeV";
-	d7.f_in = "../../data/TOTEM_7TeV/data.root";
-	d7.t_min = 0.395;
-	d7.t_dip = 0.529;
-	d7.t_bmp = 0.701;
-	d7.t_max = 0.8;
+	d7.f_in = topDir + "TOTEM_7TeV/data.root";
 	datasets.push_back(d7);
 
 	Dataset d8;
 	d8.sqrt_s = 8.;
 	d8.name = "8TeV";
-	d8.f_in = "../../data/TOTEM_8TeV/data.root";
-	d8.t_min = 0.4;
-	d8.t_dip = 0.526;
-	d8.t_bmp = 0.720;
-	d8.t_max = 0.8;
+	d8.f_in = topDir + "TOTEM_8TeV/data.root";
 	datasets.push_back(d8);
 
 	Dataset d13;
 	d13.sqrt_s = 13.;
 	d13.name = "13TeV";
-	d13.f_in = "../../data/TOTEM_13TeV/data.root";
-	d13.t_min = 0.39;	// TODO: should be 0.363
-	d13.t_dip = 0.467;
-	d13.t_bmp = 0.636;
-	d13.t_max = 0.70;	// TODO: should be 0.76
+	d13.f_in = topDir + "TOTEM_13TeV/data.root";
 	datasets.push_back(d13);
 
 	//--------------------
@@ -70,10 +56,31 @@ void InitDatasets()
 	ds_ext.sqrt_s = 1.96;
 	ds_ext.name = "1.96TeV";
 	ds_ext.f_in = "";
-	ds_ext.t_min = 0.4;
-	ds_ext.t_dip = 0.64;
-	ds_ext.t_bmp = 0.75;
-	ds_ext.t_max = 1.1;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void BuildTRanges(const string tRangeModel, Dataset &ds)
+{
+	if (tRangeModel == "old")
+	{
+		if (ds.name == "2.76TeV")	{ ds.t_min = 0.507; ds.t_dip = 0.617; ds.t_bmp = 0.750; ds.t_max = 0.800; }
+		if (ds.name == "7TeV")		{ ds.t_min = 0.412; ds.t_dip = 0.528; ds.t_bmp = 0.704; ds.t_max = 0.780; }
+		if (ds.name == "8TeV")		{ ds.t_min = 0.419; ds.t_dip = 0.516; ds.t_bmp = 0.701; ds.t_max = 0.800; }
+		if (ds.name == "13TeV")		{ ds.t_min = 0.379; ds.t_dip = 0.468; ds.t_bmp = 0.638; ds.t_max = 0.707; }
+
+		if (ds.name == "1.96TeV")	{ ds.t_min = 0.498; ds.t_dip = 0.611; ds.t_bmp = 0.762; ds.t_max = 0.816; }
+	}
+
+	if (tRangeModel == "first")
+	{
+		if (ds.name == "2.76TeV")	{ ds.t_min = 0.530; ds.t_dip = 0.616; ds.t_bmp = 0.750; ds.t_max = 0.800; }
+		if (ds.name == "7TeV")		{ ds.t_min = 0.442; ds.t_dip = 0.530; ds.t_bmp = 0.694; ds.t_max = 0.780; }
+		if (ds.name == "8TeV")		{ ds.t_min = 0.433; ds.t_dip = 0.518; ds.t_bmp = 0.687; ds.t_max = 0.800; }
+		if (ds.name == "13TeV")		{ ds.t_min = 0.400; ds.t_dip = 0.470; ds.t_bmp = 0.638; ds.t_max = 0.707; }
+
+		if (ds.name == "1.96TeV")	{ ds.t_min = 0.524; ds.t_dip = 0.611; ds.t_bmp = 0.745; ds.t_max = 0.808; }
+	}
 }
 
 //----------------------------------------------------------------------------------------------------

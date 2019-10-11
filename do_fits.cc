@@ -24,7 +24,8 @@ using namespace std;
 struct BinData
 {
 	double t, t_unc, dsdt, dsdt_unc_stat;
-	double dsdt_unc_syst_full, dsdt_unc_syst_no_norm;
+	double dsdt_unc_syst_t_dep;
+	double dsdt_unc_syst_full;
 };
 
 //----------------------------------------------------------------------------------------------------
@@ -39,16 +40,22 @@ struct InputData
 
 //----------------------------------------------------------------------------------------------------
 
+bool useStatUnc = true;
+bool useSystUnc = true;
+bool useNormUnc = false;
+
 void LoadInput(const Dataset &ds, InputData &id)
 {
 	TFile *f_in = TFile::Open(ds.f_in.c_str());
 
 	// get input
 	TGraph *g_dsdt = (TGraph *) f_in->Get("g_dsdt");
-	TMatrixDSym *m_dsdt_cov_syst_full = (TMatrixDSym *) f_in->Get("m_dsdt_cov_syst_full");
-	TMatrixDSym *m_dsdt_cov_syst_no_norm = (TMatrixDSym *) f_in->Get("m_dsdt_cov_syst_no_norm");
+	TMatrixDSym *m_dsdt_cov_syst_t_dep = (TMatrixDSym *) f_in->Get("m_dsdt_cov_syst_t_dep");
+	TVectorD *v_dsdt_syst_t_indep = (TVectorD *) f_in->Get("v_dsdt_syst_t_indep");
 
 	// get bin data
+	double t_min_eff = ds.t_min;
+
 	int idx_min = 100000, idx_max = -1000000;
 	for (int i = 0; i < g_dsdt->GetN(); ++i)
 	{
@@ -58,7 +65,7 @@ void LoadInput(const Dataset &ds, InputData &id)
 		bd.dsdt = g_dsdt->GetY()[i];
 		bd.dsdt_unc_stat = g_dsdt->GetErrorY(i);
 
-		if (bd.t < ds.t_min || bd.t > ds.t_max)
+		if (bd.t < t_min_eff || bd.t > ds.t_max)
 			continue;
 
 		idx_min = min(i, idx_min);
@@ -75,14 +82,21 @@ void LoadInput(const Dataset &ds, InputData &id)
 	{
 		for (int j = 0; j < dim; ++j)
 		{
-			const double unc_stat = (i == j) ? id.binData[i].dsdt_unc_stat : 0.;
-			const double unc_syst_sq = (*m_dsdt_cov_syst_full)(idx_min + i, idx_min + j);
+			const double con_stat = (i == j) ? pow(id.binData[i].dsdt_unc_stat, 2.) : 0.;
+			const double con_syst_t_dep = (*m_dsdt_cov_syst_t_dep)(idx_min + i, idx_min + j);
+			const double con_syst_t_indep = (*v_dsdt_syst_t_indep)(idx_min + i) * (*v_dsdt_syst_t_indep)(idx_min + j);
 
-			id.m_cov(i, j) = unc_stat*unc_stat + unc_syst_sq;
+			id.m_cov(i, j) = 0.;
+			if (useStatUnc) id.m_cov(i, j) += con_stat;
+			if (useSystUnc) id.m_cov(i, j) += con_syst_t_dep;
+			if (useNormUnc) id.m_cov(i, j) += con_syst_t_indep;
+
+			if (i == j)
+			{
+				id.binData[i].dsdt_unc_syst_t_dep = sqrt(con_syst_t_dep);
+				id.binData[i].dsdt_unc_syst_full = sqrt(con_syst_t_dep + con_syst_t_indep);
+			}
 		}
-
-		id.binData[i].dsdt_unc_syst_full = sqrt( (*m_dsdt_cov_syst_full)(idx_min + i, idx_min + i) );
-		id.binData[i].dsdt_unc_syst_no_norm = sqrt( (*m_dsdt_cov_syst_no_norm)(idx_min + i, idx_min + i) );
 	}
 
 	id.m_cov_inv.ResizeTo(id.m_cov);
@@ -132,8 +146,8 @@ double S2_FCN::operator() (const double *par) const
 void SaveInputPlots(const Dataset &ds, const InputData &id)
 {
 	TGraphErrors *g_dsdt = new TGraphErrors();
+	TGraph *g_dsdt_unc_syst_t_dep = new TGraph();
 	TGraph *g_dsdt_unc_syst_full = new TGraph();
-	TGraph *g_dsdt_unc_syst_no_norm = new TGraph();
 
 	for (unsigned int i = 0; i < id.binData.size(); ++i)
 	{
@@ -143,13 +157,13 @@ void SaveInputPlots(const Dataset &ds, const InputData &id)
 		g_dsdt->SetPoint(idx, d.t, d.dsdt);
 		g_dsdt->SetPointError(idx, d.t_unc, d.dsdt_unc_stat);
 
+		g_dsdt_unc_syst_t_dep->SetPoint(idx, d.t, d.dsdt_unc_syst_t_dep);
 		g_dsdt_unc_syst_full->SetPoint(idx, d.t, d.dsdt_unc_syst_full);
-		g_dsdt_unc_syst_no_norm->SetPoint(idx, d.t, d.dsdt_unc_syst_no_norm);
 	}
 
 	g_dsdt->Write("g_dsdt");
+	g_dsdt_unc_syst_t_dep->Write("g_dsdt_unc_syst_t_dep");
 	g_dsdt_unc_syst_full->Write("g_dsdt_unc_syst_full");
-	g_dsdt_unc_syst_no_norm->Write("g_dsdt_unc_syst_no_norm");
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -330,7 +344,9 @@ void PrintUsage()
 {
 	printf("USAGE: do_fits [option] [option] ...\n");
 	printf("OPTIONS:\n");
+	printf("    -range <string>\n");
 	printf("    -model <string>\n");
+	printf("    -unc <string>\n");
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -338,7 +354,9 @@ void PrintUsage()
 int main(int argc, const char **argv)
 {
 	// defaults
+	string tRange = "";
 	string fitModel = "";
+	string uncChoice = "";
 
 	// parse command line
 	for (int argi = 1; (argi < argc) && (cl_error == 0); ++argi)
@@ -349,7 +367,9 @@ int main(int argc, const char **argv)
 			continue;
 		}
 
+		if (TestStringParameter(argc, argv, argi, "-range", tRange)) continue;
 		if (TestStringParameter(argc, argv, argi, "-model", fitModel)) continue;
+		if (TestStringParameter(argc, argv, argi, "-unc", uncChoice)) continue;
 		
 		printf("ERROR: unknown option '%s'.\n", argv[argi]);
 		cl_error = 1;
@@ -362,17 +382,28 @@ int main(int argc, const char **argv)
 	}
 
 	// input validation
-	if (fitModel == "")
+	if (tRange == "" || fitModel == "" || uncChoice == "")
 	{
-		printf("ERROR: fit model not set.\n");
+		printf("ERROR: some mandatory input not provided.\n");
 		PrintUsage();
 	}
+
+	useStatUnc = (uncChoice.find("st") != string::npos);
+	useSystUnc = (uncChoice.find("sy") != string::npos);
+	useNormUnc = (uncChoice.find("no") != string::npos);
+
+	printf("useStatUnc = %i\n", useStatUnc);
+	printf("useSystUnc = %i\n", useSystUnc);
+	printf("useNormUnc = %i\n", useNormUnc);
 
 	// prepare datasets
 	InitDatasets();
 
 	for (auto &ds : datasets)
+	{
+		BuildTRanges(tRange, ds);
 		BuildFitFunction(fitModel, ds);
+	}
 
 	// prepare output
 	TFile *f_out = TFile::Open("do_fits.root", "recreate");
@@ -419,6 +450,8 @@ int main(int argc, const char **argv)
 
 		const ROOT::Fit::FitResult &result = fitter.Result();
 		ds.ff->SetParameters(result.GetParams());
+
+		ds.ff->Write("f_fit");
 
 		SaveFitResults(result);
 
