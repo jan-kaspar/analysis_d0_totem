@@ -44,9 +44,9 @@ int main()
 		-33.9, 113., -139., 54.7
 	);
 	ff->FixParameter(3, 0.);
-	ff->SetRange(0.25, 0.95);
+	ff->SetRange(0.25, 1.1);
 
-	g_dsdt->Fit(ff, "", "", 0.25, 0.95);
+	g_dsdt->Fit(ff, "", "", 0.25, 1.1);
 
 	g_dsdt->Write("g_dsdt");
 	ff->Write("f_dsdt");
