@@ -1,12 +1,15 @@
 import root;
 import pad_layout;
 
-include "../dip/common_code.asy";
+include "../templates/common_code.asy";
 
 string top_dir = "../../";
 
 string methods[];
-methods.push("first");
+methods.push("minimal");
+methods.push("low_t");
+methods.push("high_t");
+methods.push("low_t,high_t");
 
 TGraph_errorBar = None;
 
@@ -24,7 +27,7 @@ for (int mi : methods.keys)
 {
 	NewRow();
 
-	NewPadLabel(methods[mi]);
+	NewPadLabel(replace(methods[mi], "_", "\_"));
 
 	for (int dsi : datasets.keys)
 	{
@@ -56,6 +59,8 @@ for (int mi : methods.keys)
 		real dt_dw = -0.01, dt_up = 0.01;
 		real f_y_up = 1.2, f_y_dw = 0.8;
 
+		filldraw(Scale((t_min - t_min_unc, dsdt_min * f_y_dw))--Scale((t_min + t_min_unc, dsdt_min * f_y_dw))
+			--Scale((t_min + t_min_unc, dsdt_min * f_y_up))--Scale((t_min - t_min_unc, dsdt_min * f_y_up))--cycle, cyan+opacity(0.3), nullpen);
 		draw(Scale((t_min, dsdt_min * f_y_dw))--Scale((t_min, dsdt_min * f_y_up)), cyan+1.3pt);
 		draw(Scale((t_min + dt_dw, dsdt_min))--Scale((t_dip + dt_up, dsdt_min)), cyan+1.3pt);
 
@@ -69,6 +74,8 @@ for (int mi : methods.keys)
 		draw(Scale((t_bmp, dsdt_bmp * f_y_dw))--Scale((t_bmp, dsdt_bmp * f_y_up)), heavygreen+1.3pt);
 		draw(Scale((t_dip + dt_dw, dsdt_bmp))--Scale((t_max + dt_up, dsdt_bmp)), heavygreen+1.3pt);
 
+		filldraw(Scale((t_max - t_max_unc, dsdt_max * f_y_dw))--Scale((t_max + t_max_unc, dsdt_max * f_y_dw))
+			--Scale((t_max + t_max_unc, dsdt_max * f_y_up))--Scale((t_max - t_max_unc, dsdt_max * f_y_up))--cycle, magenta+opacity(0.3), nullpen);
 		draw(Scale((t_max, dsdt_max * f_y_dw))--Scale((t_max, dsdt_max * f_y_up)), magenta+1.3pt);
 		draw(Scale((t_bmp + dt_dw, dsdt_max))--Scale((t_max + dt_up, dsdt_max)), magenta+1.3pt);
 

@@ -338,6 +338,56 @@ void BuildSensitivtyPlot(const Dataset &ds)
 }
 
 //----------------------------------------------------------------------------------------------------
+
+void BuildComponentPlots(const Dataset &ds, const string fitModel)
+{
+	TDirectory *d_top = gDirectory;
+
+	gDirectory = d_top->mkdir("components");
+
+	// define components
+	vector<TF1*> components;
+
+	// TODO
+	//if (fitModel == "e012+e012")
+	{
+		TF1 *ff_comp1 = new TF1(*ds.ff);
+		ff_comp1->SetName("g_comp1");
+		ff_comp1->SetParameter(3, -1E10);
+		ff_comp1->SetParameter(4, 0.);
+		ff_comp1->SetParameter(5, 0.);
+		components.push_back(ff_comp1);
+
+		TF1 *ff_comp2 = new TF1(*ds.ff);
+		ff_comp2->SetName("g_comp2");
+		ff_comp2->SetParameter(0, -1E10);
+		ff_comp2->SetParameter(1, 0.);
+		ff_comp2->SetParameter(2, 0.);
+		components.push_back(ff_comp2);
+	}
+
+	// sample components
+	for (const auto f : components)
+	{
+		TGraph *g = new TGraph();
+		g->SetName(f->GetName());
+
+		for (unsigned int i = 0; i < n_points; ++i)
+		{
+			const double t = ds.t_min + (ds.t_max - ds.t_min) / (n_points - 1) * i;
+
+			int idx = g->GetN();
+			g->SetPoint(idx, t, f->Eval(t));
+		}
+
+		g->Write();
+	}
+
+	// clean up
+	gDirectory = d_top;
+}
+
+//----------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------
 
 void PrintUsage()
@@ -437,18 +487,25 @@ int main(int argc, const char **argv)
 
 		for (int i = 0; i < n_parameters; ++i)
 		{
-			fitter.Config().ParSettings(i).Set(ds.ff->GetParName(i), ds.ff->GetParameter(i), fabs(ds.ff->GetParameter(i)) * 0.05);
+			fitter.Config().ParSettings(i).Set(ds.ff->GetParName(i), ds.ff->GetParameter(i), fabs(ds.ff->GetParameter(i)) * 0.01);
 		}
 
 		fitter.FitFCN();
 		fitter.FitFCN();
+
+		// print results
+		const ROOT::Fit::FitResult &result = fitter.Result();
+		for (unsigned int i = 0; i < result.NPar(); ++i)
+		{
+			printf("par %u: %.3E +- %.3E\n", i, result.Parameter(i), sqrt(result.CovMatrix(i, i)));
+		}
+
 
 		// save fit results
 		gDirectory = d_ds;
 
 		SaveInputPlots(ds, id);
 
-		const ROOT::Fit::FitResult &result = fitter.Result();
 		ds.ff->SetParameters(result.GetParams());
 
 		ds.ff->Write("f_fit");
@@ -465,6 +522,8 @@ int main(int argc, const char **argv)
 		BuildUncertaintyBand(ds, result);
 
 		BuildSensitivtyPlot(ds);
+
+		BuildComponentPlots(ds, fitModel);
 	}
 
 	// clean up

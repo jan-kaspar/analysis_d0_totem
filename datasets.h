@@ -62,17 +62,7 @@ void InitDatasets()
 
 void BuildTRanges(const string tRangeModel, Dataset &ds)
 {
-	if (tRangeModel == "old")
-	{
-		if (ds.name == "2.76TeV")	{ ds.t_min = 0.507; ds.t_dip = 0.617; ds.t_bmp = 0.750; ds.t_max = 0.800; }
-		if (ds.name == "7TeV")		{ ds.t_min = 0.412; ds.t_dip = 0.528; ds.t_bmp = 0.704; ds.t_max = 0.780; }
-		if (ds.name == "8TeV")		{ ds.t_min = 0.419; ds.t_dip = 0.516; ds.t_bmp = 0.701; ds.t_max = 0.800; }
-		if (ds.name == "13TeV")		{ ds.t_min = 0.379; ds.t_dip = 0.468; ds.t_bmp = 0.638; ds.t_max = 0.707; }
-
-		if (ds.name == "1.96TeV")	{ ds.t_min = 0.498; ds.t_dip = 0.611; ds.t_bmp = 0.762; ds.t_max = 0.816; }
-	}
-
-	if (tRangeModel == "first")
+	if (tRangeModel == "minimal")
 	{
 		if (ds.name == "2.76TeV")	{ ds.t_min = 0.530; ds.t_dip = 0.616; ds.t_bmp = 0.750; ds.t_max = 0.800; }
 		if (ds.name == "7TeV")		{ ds.t_min = 0.442; ds.t_dip = 0.530; ds.t_bmp = 0.694; ds.t_max = 0.780; }
@@ -80,6 +70,36 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 		if (ds.name == "13TeV")		{ ds.t_min = 0.400; ds.t_dip = 0.470; ds.t_bmp = 0.638; ds.t_max = 0.707; }
 
 		if (ds.name == "1.96TeV")	{ ds.t_min = 0.524; ds.t_dip = 0.611; ds.t_bmp = 0.745; ds.t_max = 0.808; }
+	}
+
+	if (tRangeModel == "low_t")
+	{
+		if (ds.name == "2.76TeV")	{ ds.t_min = 0.450; ds.t_dip = 0.616; ds.t_bmp = 0.750; ds.t_max = 0.800; }
+		if (ds.name == "7TeV")		{ ds.t_min = 0.368; ds.t_dip = 0.530; ds.t_bmp = 0.694; ds.t_max = 0.780; }
+		if (ds.name == "8TeV")		{ ds.t_min = 0.375; ds.t_dip = 0.518; ds.t_bmp = 0.687; ds.t_max = 0.800; }
+		if (ds.name == "13TeV")		{ ds.t_min = 0.338; ds.t_dip = 0.470; ds.t_bmp = 0.638; ds.t_max = 0.707; }
+
+		if (ds.name == "1.96TeV")	{ ds.t_min = 0.443; ds.t_dip = 0.611; ds.t_bmp = 0.745; ds.t_max = 0.808; }
+	}
+
+	if (tRangeModel == "high_t")
+	{
+		if (ds.name == "2.76TeV")	{ ds.t_min = 0.530; ds.t_dip = 0.616; ds.t_bmp = 0.750; ds.t_max = 0.990; }
+		if (ds.name == "7TeV")		{ ds.t_min = 0.442; ds.t_dip = 0.530; ds.t_bmp = 0.694; ds.t_max = 0.878; }
+		if (ds.name == "8TeV")		{ ds.t_min = 0.433; ds.t_dip = 0.518; ds.t_bmp = 0.687; ds.t_max = 0.900; }
+		if (ds.name == "13TeV")		{ ds.t_min = 0.400; ds.t_dip = 0.470; ds.t_bmp = 0.638; ds.t_max = 0.858; }
+
+		if (ds.name == "1.96TeV")	{ ds.t_min = 0.524; ds.t_dip = 0.611; ds.t_bmp = 0.745; ds.t_max = 0.838; }
+	}
+
+	if (tRangeModel == "low_t,high_t")
+	{
+		if (ds.name == "2.76TeV")	{ ds.t_min = 0.450; ds.t_dip = 0.616; ds.t_bmp = 0.750; ds.t_max = 0.990; }
+		if (ds.name == "7TeV")		{ ds.t_min = 0.368; ds.t_dip = 0.530; ds.t_bmp = 0.694; ds.t_max = 0.878; }
+		if (ds.name == "8TeV")		{ ds.t_min = 0.375; ds.t_dip = 0.518; ds.t_bmp = 0.687; ds.t_max = 0.900; }
+		if (ds.name == "13TeV")		{ ds.t_min = 0.338; ds.t_dip = 0.470; ds.t_bmp = 0.638; ds.t_max = 0.858; }
+
+		if (ds.name == "1.96TeV")	{ ds.t_min = 0.443; ds.t_dip = 0.611; ds.t_bmp = 0.745; ds.t_max = 0.838; }
 	}
 }
 
@@ -89,10 +109,11 @@ int n_parameters = 0;
 
 void BuildFitFunction(const string fitModel, Dataset &ds)
 {
+	printf("\n>> BuildFitFunction(%s)\n", fitModel.c_str());
+
 	if (fitModel == "e012+e012")
 	{
 		const double t1 = (ds.t_dip + ds.t_min) / 2.;
-		//const double t2 = (ds.t_max + ds.t_dip) / 2.;
 		const double t2 = ds.t_bmp;
 
 		n_parameters = 6;
@@ -101,10 +122,96 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f) + [5]*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2, t2);
 		ds.ff = new TF1("ff", buf);
 
-		if (ds.name == "2.76TeV") ds.ff->SetParameters(-3.78, -19.3, -0.3, -4.19, -1.68, -264.);
-		if (ds.name == "7TeV") ds.ff->SetParameters(-3.6, -36.3, -82.4, -3.13, 3.29, -27.3);
-		if (ds.name == "8TeV") ds.ff->SetParameters(-3.97, -34.4, -46.5, -3.53, 0.174, -15.31);
-		if (ds.name == "13TeV") ds.ff->SetParameters(-3.6, -36.3, -82.4, -3.13, 3.29, -27.3);
+		if (ds.name == "2.76TeV") ds.ff->SetParameters(-4.35, -27.3, -147., -4.58, -16.8, -160.);
+		if (ds.name == "7TeV") ds.ff->SetParameters(-4.45, -30.4, -65.5, -3.62, 0.34, -21.7);
+		if (ds.name == "8TeV") ds.ff->SetParameters(-4.27, -41.8, -297., -3.50, 0.59, -22.4);
+		if (ds.name == "13TeV") ds.ff->SetParameters(-4.00, -44.7, -140., -3.03, 0.1, -24.2);
+
+		return;
+	}
+
+	// e012_x.y+e012
+	if (fitModel.find("e012_") == 0 && fitModel.find("e012", 8) == 9)
+	{
+		double f = atof(fitModel.substr(5, 3).c_str());
+
+		printf("f = %.2f\n", f);
+
+		const double t1 = ds.t_min * (1. - f) + ds.t_dip * f;
+		const double t1_ref = (ds.t_min + ds.t_dip) / 2.;
+		const double t2 = ds.t_bmp;
+
+		printf("t1 = %.3f\n", t1);
+
+		n_parameters = 6;
+
+		char buf[500];
+		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f) + [5]*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2, t2);
+		ds.ff = new TF1("ff", buf);
+
+		// these are the parameters at t1_ref
+		if (ds.name == "2.76TeV") ds.ff->SetParameters(-4.35, -27.3, -147., -4.58, -16.8, -160.);
+		if (ds.name == "7TeV") ds.ff->SetParameters(-4.45, -30.4, -65.5, -3.62, 0.34, -21.7);
+		if (ds.name == "8TeV") ds.ff->SetParameters(-4.27, -41.8, -297., -3.50, 0.59, -22.4);
+		if (ds.name == "13TeV") ds.ff->SetParameters(-4.00, -44.7, -140., -3.03, 0.1, -24.2);
+
+		// do evolution from t1_ref to t1
+		const double p0 = ds.ff->GetParameter(0);
+		const double p1 = ds.ff->GetParameter(1);
+		const double p2 = ds.ff->GetParameter(2);
+
+		const double pp2 = p2;
+		const double pp1 = p1 - 2.*p2 * (t1_ref - t1);
+		const double pp0 = p0 - p1*t1_ref + pp1*t1 + p2 * (t1_ref*t1_ref - t1*t1);
+
+		ds.ff->SetParameter(0, pp0);
+		ds.ff->SetParameter(1, pp1);
+		ds.ff->SetParameter(2, pp2);
+
+		for (double t : { 0.40, 0.45, 0.50 })
+		{
+			printf("t=%.2f --> f=%.4f\n", t, ds.ff->Eval(t));
+		}
+
+		return;
+	}
+
+	if (fitModel == "e012+e0123")
+	{
+		const double t1 = (ds.t_dip + ds.t_min) / 2.;
+		//const double t2 = (ds.t_max + ds.t_dip) / 2.;
+		const double t2 = ds.t_bmp;
+
+		n_parameters = 7;
+
+		char buf[500];
+		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f) + [5]*(x-%.3f)*(x-%.3f) + [6]*(x-%.3f)*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2, t2, t2, t2, t2);
+		ds.ff = new TF1("ff", buf);
+
+		if (ds.name == "2.76TeV") ds.ff->SetParameters(-3.78, -19.3, -0.3, -4.19, -1.68, -264., 0.);
+		if (ds.name == "7TeV") ds.ff->SetParameters(-3.6, -36.3, -82.4, -3.13, 3.29, -24.3, 40.);
+		if (ds.name == "8TeV") ds.ff->SetParameters(-3.97, -34.4, -46.5, -3.53, 0.174, -12.31, 40.);
+		if (ds.name == "13TeV") ds.ff->SetParameters(-3.6, -36.3, -82.4, -3.13, 3.29, -24.3, 40.);
+
+		return;
+	}
+
+	if (fitModel == "e012+e023")
+	{
+		const double t1 = (ds.t_dip + ds.t_min) / 2.;
+		//const double t2 = (ds.t_max + ds.t_dip) / 2.;
+		const double t2 = ds.t_bmp;
+
+		n_parameters = 6;
+
+		char buf[500];
+		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f)*(x-%.3f) + [5]*(x-%.3f)*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2, t2, t2, t2);
+		ds.ff = new TF1("ff", buf);
+
+		if (ds.name == "2.76TeV") ds.ff->SetParameters(-3.78, -19.3, -0.3, -4.19, -264., 0.);
+		if (ds.name == "7TeV") ds.ff->SetParameters(-3.6, -36.3, -82.4, -3.13, -24.3, 40.);
+		if (ds.name == "8TeV") ds.ff->SetParameters(-3.97, -34.4, -46.5, -3.53, -12.31, 40.);
+		if (ds.name == "13TeV") ds.ff->SetParameters(-3.6, -36.3, -82.4, -3.13, -24.3, 40.);
 
 		return;
 	}

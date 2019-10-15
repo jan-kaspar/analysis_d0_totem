@@ -1,12 +1,15 @@
 import root;
 import pad_layout;
 
-include "../dip/common_code.asy";
+include "../templates/common_code.asy";
 
 string top_dir = "../../";
 
 string methods[];
-methods.push("first");
+methods.push("minimal");
+methods.push("low_t");
+methods.push("high_t");
+methods.push("low_t,high_t");
 
 string quantities[], q_labels[];
 quantities.push("t_min"); q_labels.push("$t_{\rm min}\ung{GeV^2}$");
@@ -22,7 +25,7 @@ for (int mi : methods.keys)
 {
 	NewRow();
 
-	NewPadLabel(methods[mi]);
+	NewPadLabel(replace(methods[mi], "_", "\_"));
 
 	for (int qi : quantities.keys)
 	{
@@ -43,6 +46,8 @@ for (int mi : methods.keys)
 
 		draw((ext_sqrt_s, ext_q), heavygreen, l, mCi+3pt+heavygreen);
 		draw((ext_sqrt_s, ext_q-ext_q_unc)--(ext_sqrt_s, ext_q+ext_q_unc), heavygreen);
+
+		xlimits(1, 14, Crop);
 
 		AttachLegend();
 	}
