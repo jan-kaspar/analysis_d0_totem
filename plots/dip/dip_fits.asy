@@ -102,7 +102,7 @@ for (int dsi : datasets.keys)
 
 	draw(g_dsdt, "p", blue, mCi+0.5pt);
 
-	limits((0.4, 4e-3), (0.8, 1e-1), Crop);
+	limits((0.3, 4e-3), (0.9, 4e-1), Crop);
 
 	AddToLegend("$\ch^2/ndf = " + format("%.1f / (", chi2) + format("%.0f", n_fit_points) + format(" - %.0f)", n_fit_points - ndf) + format(" = %.1f$", chi2_ndf));
 
@@ -172,7 +172,7 @@ for (int dsi : datasets.keys)
 	draw(gr_fit_pl_unc, red+dashed);
 	draw(gr_fit_mi_unc, red+dashed);
 
-	xlimits(0.4, 0.8, Crop);
+	xlimits(0.3, 0.9, Crop);
 }
 
 //----------------------------------------------------------------------------------------------------

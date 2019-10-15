@@ -16,6 +16,8 @@ scale(Linear, Log);
 
 draw(RootGetObject("../../../../../data/D0_1.9TeV/d0_dsdt_1.96TeV.root", "g_D0_dsdt_1.96TeV"), "l,p", black+dashed, mCi+1pt, "D0 measurement");
 
+draw(RootGetObject("../../../../../data/TOTEM_2.76TeV/data.root", "g_dsdt"), "l,p", blue+dashed, mCi+1pt+blue, "TOTEM at 2.76");
+
 AddToLegend("<TOTEM extrapolation:");
 
 draw(RootGetObject(f, base + "/g_dsdt_ext"), "l", red, "central value");
@@ -23,6 +25,6 @@ draw(RootGetObject(f, base + "/g_dsdt_ext"), "l", red, "central value");
 draw(RootGetObject(f, base + "/g_dsdt_ext_pl_unc"), "l", red+dashed, "uncertainty band");
 draw(RootGetObject(f, base + "/g_dsdt_ext_mi_unc"), "l", red+dashed);
 
-limits((0.4, 4e-3), (0.9, 1e-1), Crop);
+limits((0.4, 4e-3), (0.9, 4e-1), Crop);
 
 AttachLegend(NW, NE);
