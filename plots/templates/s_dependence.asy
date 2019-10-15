@@ -47,10 +47,10 @@ for (int pari = 0; pari < n_parameters; ++pari)
 			RootObject g_fit_pl_unc = RootGetObject(f, base + "|g_fit_pl_unc");
 			RootObject g_fit_mi_unc = RootGetObject(f, base + "|g_fit_mi_unc");
 
-			draw(g_cnt, "p", red, mCi+2pt+red);
-			draw(g_fit, "l", blue);
-			draw(g_fit_pl_unc, "l", blue+dashed);
-			draw(g_fit_mi_unc, "l", blue+dashed);
+			draw(g_cnt, "p", blue, mCi+2pt+blue);
+			draw(g_fit, "l", red);
+			draw(g_fit_pl_unc, "l", red+dashed);
+			draw(g_fit_mi_unc, "l", red+dashed);
 
 			/*
 			if (pari == 5)
