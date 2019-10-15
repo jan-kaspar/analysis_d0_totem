@@ -36,7 +36,10 @@ int main()
 	};
 
 	vector<Method> methods = {
-		{ "first" }
+		{ "minimal" },
+		{ "low_t" },
+		{ "high_t" },
+		{ "low_t,high_t" },
 	};
 
 	// prepare output
@@ -44,6 +47,11 @@ int main()
 
 	for (const auto &method : methods)
 	{
+		printf("\n");
+		printf("--------------------------------------------------\n");
+		printf(" method %s\n", method.name.c_str());
+		printf("--------------------------------------------------\n");
+
 		TDirectory *d_method = f_out->mkdir(method.name.c_str());
 
 		TGraphErrors *g_t_min_vs_sqrt_s = new TGraphErrors();
@@ -102,9 +110,11 @@ int main()
 			if (ds.name == "13TeV") t_bmp_unc = 0.01;
 
 			// find t_min
-			const double dsdt_min = dsdt_bmp * (dsdt_bmp / dsdt_dip);
+			double dsdt_min = dsdt_bmp * (dsdt_bmp / dsdt_dip);
+			if (method.name.find("low_t") != string::npos) dsdt_min = dsdt_dip * 17.;
+
 			double t_min = 0., diff_min = 1E100;
-			for (double t = 0.3; t < ds.t2; t += dt)
+			for (double t = 0.25; t < ds.t2; t += dt)
 			{
 				const double diff = fabs(dsdt_min - f_fit->Eval(t));
 
@@ -115,8 +125,21 @@ int main()
 				}
 			}
 
+			double ep = 1E-4;
+			double slp = (f_fit->Eval(t_min + ep) - f_fit->Eval(t_min)) / ep;
+
+			double dsdt_min_rel_unc = 0.;
+			if (ds.name == "2.76TeV") dsdt_min_rel_unc = 0.15;
+			if (ds.name == "7TeV") dsdt_min_rel_unc = 0.10;
+			if (ds.name == "8TeV") dsdt_min_rel_unc = 0.10;
+			if (ds.name == "13TeV") dsdt_min_rel_unc = 0.05;
+
+			double t_min_unc = fabs(dsdt_min_rel_unc * dsdt_min / slp);
+
 			// find t_max
-			const double dsdt_max = 0.89 * dsdt_bmp;
+			double dsdt_max = 0.9 * dsdt_bmp;
+			if (method.name.find("high_t") != string::npos) dsdt_max = dsdt_dip;
+
 			double t_max = 0.;
 			diff_min = 1E100;
 			for (double t = t_bmp; t < ds.t3 + 0.2; t += dt)
@@ -128,6 +151,21 @@ int main()
 					t_max = t;
 					diff_min = diff;
 				}
+			}
+
+			double t_max_unc = 0.;
+
+			if (method.name.find("high_t"))
+			{
+				if (ds.name == "2.76TeV") t_max_unc = 0.08;
+				if (ds.name == "7TeV") t_max_unc = 0.02;
+				if (ds.name == "8TeV") t_max_unc = 0.05;
+				if (ds.name == "13TeV") t_max_unc = 0.01;
+			} else {
+				if (ds.name == "2.76TeV") t_max_unc = 0.08;
+				if (ds.name == "7TeV") t_max_unc = 0.03;
+				if (ds.name == "8TeV") t_max_unc = 0.05;
+				if (ds.name == "13TeV") t_max_unc = 0.02;
 			}
 
 			// manual correction
@@ -147,7 +185,7 @@ int main()
 			gDirectory = d_method->mkdir(ds.name.c_str());
 
 			TGraph *g_data = new TGraph();
-			g_data->SetPoint(0, t_min, 0.);
+			g_data->SetPoint(0, t_min, t_min_unc);
 			g_data->SetPoint(1, dsdt_min, 0.);
 
 			g_data->SetPoint(2, t_dip, t_dip_unc);
@@ -156,7 +194,7 @@ int main()
 			g_data->SetPoint(4, t_bmp, t_bmp_unc);
 			g_data->SetPoint(5, dsdt_bmp, 0.);
 
-			g_data->SetPoint(6, t_max, 0.);
+			g_data->SetPoint(6, t_max, t_max_unc);
 			g_data->SetPoint(7, dsdt_max, 0.);
 
 			g_data->Write("g_data");
@@ -164,6 +202,7 @@ int main()
 			// fill graphs
 			int idx = g_t_min_vs_sqrt_s->GetN();
 			g_t_min_vs_sqrt_s->SetPoint(idx, ds.sqrt_s, t_min);
+			g_t_min_vs_sqrt_s->SetPointError(idx, 0., t_min_unc);
 
 			g_t_dip_vs_sqrt_s->SetPoint(idx, ds.sqrt_s, t_dip);
 			g_t_dip_vs_sqrt_s->SetPointError(idx, 0., t_dip_unc);
@@ -172,6 +211,7 @@ int main()
 			g_t_bmp_vs_sqrt_s->SetPointError(idx, 0., t_bmp_unc);
 
 			g_t_max_vs_sqrt_s->SetPoint(idx, ds.sqrt_s, t_max);
+			g_t_max_vs_sqrt_s->SetPointError(idx, 0., t_max_unc);
 
 			// clean up
 			delete f_in;
@@ -181,10 +221,10 @@ int main()
 		TF1 *ff = new TF1("ff", "[0] + [1]*(x-[2])");
 		ff->FixParameter(2, ds_ext.sqrt_s);
 
-		g_t_min_vs_sqrt_s->Fit(ff);
-		g_t_dip_vs_sqrt_s->Fit(ff);
-		g_t_bmp_vs_sqrt_s->Fit(ff);
-		g_t_max_vs_sqrt_s->Fit(ff);
+		g_t_min_vs_sqrt_s->Fit(ff, "Q");
+		g_t_dip_vs_sqrt_s->Fit(ff, "Q");
+		g_t_bmp_vs_sqrt_s->Fit(ff, "Q");
+		g_t_max_vs_sqrt_s->Fit(ff, "Q");
 
 		// save results
 		gDirectory = d_method;
