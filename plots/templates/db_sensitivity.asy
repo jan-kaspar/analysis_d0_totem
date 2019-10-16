@@ -47,7 +47,7 @@ for (int pari = 0; pari < n_parameters; ++pari)
 		scale(Linear, Log);
 
 		draw(g_mi, "l", blue);
-		draw(g_pl, "l", blue);
+		draw(g_pl, "l", heavygreen);
 
 		draw(g_fit, "l", red);
 
