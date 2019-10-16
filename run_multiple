@@ -1,21 +1,58 @@
 #!/bin/bash
 
-models=(
-	"e012+e012"
-	#"e012+e012_t_0"
-	#"e012+e02"
-	#"e012+e012_t_dip"
-	#"e01-int-e01"
-)
+# models:
 
-t_ranges=(
-	"first"
+# t_ranges
+#	"minimal"
+#	"low_t"
+#	"high_t"
+#	"low_t/high_t"
+
+models_ranges=(
+	##"minimal/e012+e012"
+	##"minimal/e01+e012"
+	#"minimal/e012+e02"
+	##"minimal/e01+e02"
+	#"minimal/e01+e023"
+	"minimal/e01+e023:f=0.05"
+
+	#"minimal/e01+e023:f=0.0"
+	#"minimal/e01+e023:f=0.05"
+	#"minimal/e01+e023:f=0.1"
+	#"minimal/e01+e023:f=0.15"
+	#"minimal/e01+e023:f=0.2"
+	#"minimal/e01+e023:f=0.3"
+	#"minimal/e01+e023:f=0.4"
+	#"minimal/e01+e023:f=0.5"
+	#"minimal/e01+e023:f=0.6"
+	#"minimal/e01+e023:f=0.7"
+	#"minimal/e01+e023:f=0.8"
+	#"minimal/e01+e023:f=0.9"
+	#"minimal/e01+e023:f=1.0"
+
+	##"low_t,high_t/e012+e0123"
+	#"low_t,high_t/e012+e023"
+	"low_t,high_t/e012+e023:f=0.2"
+
+	#"low_t,high_t/e012+e023:f=0.0"
+	#"low_t,high_t/e012+e023:f=0.05"
+	#"low_t,high_t/e012+e023:f=0.1"
+	#"low_t,high_t/e012+e023:f=0.15"
+	#"low_t,high_t/e012+e023:f=0.2"
+	#"low_t,high_t/e012+e023:f=0.3"
+	#"low_t,high_t/e012+e023:f=0.4"
+	#"low_t,high_t/e012+e023:f=0.5"
+	#"low_t,high_t/e012+e023:f=0.6"
+	#"low_t,high_t/e012+e023:f=0.7"
+	#"low_t,high_t/e012+e023:f=0.8"
+	#"low_t,high_t/e012+e023:f=0.9"
+	#"low_t,high_t/e012+e023:f=1.0"
 )
 
 uncs=(
-	"st"
+	#"st"
 	"st+sy"
-	"st+sy+no"
+	#"st+sy+no"
 )
 
 #----------------------------------------------------------------------------------------------------
@@ -28,6 +65,20 @@ function RunOne()
 
 	mkdir -p "$dir"
 
+	# make plot links
+	make_plot_links="n"
+	if [ "$make_plot_links" == "y" ]
+	then
+		rm -rf "$dir/plots"
+		mkdir -p "$dir/plots"
+
+		for f in plots/templates/*.asy
+		do
+			ln -s "../../../../../$f" "$dir/plots/"
+		done
+	fi
+
+	# run fits
 	cd "$dir"
 
 	../../../../do_fits -model "$model" -range "$t_range" -unc "$unc" &> "do_fits.log"
@@ -40,15 +91,15 @@ function RunOne()
 
 make -j2 || exit 1
 
-for model in ${models[*]}
+for model_range in ${models_ranges[*]}
 do
-	for t_range in ${t_ranges[*]}
-	do
-		for unc in ${uncs[*]}
-		do
-			dir="fits/$model/$t_range/$unc"
+	t_range=${model_range%/*}
+	model=${model_range#*/}
 
-			RunOne "$dir" &
-		done
+	for unc in ${uncs[*]}
+	do
+		dir="fits/$t_range/$model/$unc"
+
+		RunOne "$dir" &
 	done
 done

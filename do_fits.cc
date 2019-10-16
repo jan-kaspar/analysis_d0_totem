@@ -348,7 +348,7 @@ void BuildComponentPlots(const Dataset &ds, const string fitModel)
 	// define components
 	vector<TF1*> components;
 
-	if (fitModel == "e012+e012" || fitModel == "e012+e023")
+	if (fitModel.find("e012+e012") == 0 || fitModel.find("e012+e023") == 0)
 	{
 		TF1 *ff_comp1 = new TF1(*ds.ff);
 		ff_comp1->SetName("g_comp1");
@@ -365,7 +365,7 @@ void BuildComponentPlots(const Dataset &ds, const string fitModel)
 		components.push_back(ff_comp2);
 	}
 
-	if (fitModel == "e012+e02")
+	if (fitModel.find("e012+e02") == 0)
 	{
 		TF1 *ff_comp1 = new TF1(*ds.ff);
 		ff_comp1->SetName("g_comp1");
@@ -381,7 +381,7 @@ void BuildComponentPlots(const Dataset &ds, const string fitModel)
 		components.push_back(ff_comp2);
 	}
 
-	if (fitModel == "e01+e023")
+	if (fitModel.find("e01+e023") == 0)
 	{
 		TF1 *ff_comp1 = new TF1(*ds.ff);
 		ff_comp1->SetName("g_comp1");

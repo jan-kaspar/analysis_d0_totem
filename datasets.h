@@ -113,37 +113,20 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 {
 	printf("\n>> BuildFitFunction(%s, %s)\n", fitModel.c_str(), ds.name.c_str());
 
-	if (fitModel == "e012+e012")
+	if (fitModel.find("e012+e012") == 0)
 	{
-		const double t1 = (ds.t_dip + ds.t_min) / 2.;
-		const double t2 = ds.t_bmp;
+		double f = 0.5; // default
 
-		n_parameters = 6;
-
-		char buf[500];
-		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f) + [5]*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2, t2);
-		ds.ff = new TF1("ff", buf);
-
-		if (ds.name == "2.76TeV") ds.ff->SetParameters(-4.35, -27.3, -147., -4.58, -16.8, -160.);
-		if (ds.name == "7TeV") ds.ff->SetParameters(-4.45, -30.4, -65.5, -3.62, 0.34, -21.7);
-		if (ds.name == "8TeV") ds.ff->SetParameters(-4.27, -41.8, -297., -3.50, 0.59, -22.4);
-		if (ds.name == "13TeV") ds.ff->SetParameters(-4.00, -44.7, -140., -3.03, 0.1, -24.2);
-
-		return;
-	}
-
-	// e012_x.y+e012
-	if (fitModel.find("e012_") == 0 && fitModel.find("e012", 8) == 9)
-	{
-		double f = atof(fitModel.substr(5, 3).c_str());
-
-		printf("f = %.2f\n", f);
+		const auto pos = fitModel.find(":f=");
+		if (pos != string::npos)
+		{
+			f = atof(fitModel.substr(pos+3).c_str());
+			printf("f = %.2f\n", f);
+		}
 
 		const double t1 = ds.t_min * (1. - f) + ds.t_dip * f;
-		const double t1_ref = (ds.t_min + ds.t_dip) / 2.;
+		const double t1_def = (ds.t_min + ds.t_dip) / 2.;
 		const double t2 = ds.t_bmp;
-
-		printf("t1 = %.3f\n", t1);
 
 		n_parameters = 6;
 
@@ -151,29 +134,27 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f) + [5]*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2, t2);
 		ds.ff = new TF1("ff", buf);
 
-		// these are the parameters at t1_ref
+		// these are the parameters at t1_def
 		if (ds.name == "2.76TeV") ds.ff->SetParameters(-4.35, -27.3, -147., -4.58, -16.8, -160.);
 		if (ds.name == "7TeV") ds.ff->SetParameters(-4.45, -30.4, -65.5, -3.62, 0.34, -21.7);
 		if (ds.name == "8TeV") ds.ff->SetParameters(-4.27, -41.8, -297., -3.50, 0.59, -22.4);
 		if (ds.name == "13TeV") ds.ff->SetParameters(-4.00, -44.7, -140., -3.03, 0.1, -24.2);
 
-		// do evolution from t1_ref to t1
+		// do evolution from t1_def to t1
 		const double p0 = ds.ff->GetParameter(0);
 		const double p1 = ds.ff->GetParameter(1);
 		const double p2 = ds.ff->GetParameter(2);
 
 		const double pp2 = p2;
-		const double pp1 = p1 - 2.*p2 * (t1_ref - t1);
-		const double pp0 = p0 - p1*t1_ref + pp1*t1 + p2 * (t1_ref*t1_ref - t1*t1);
+		const double pp1 = p1 - 2.*p2 * (t1_def - t1);
+		const double pp0 = p0 - p1*t1_def + pp1*t1 + p2 * (t1_def*t1_def - t1*t1);
 
 		ds.ff->SetParameter(0, pp0);
 		ds.ff->SetParameter(1, pp1);
 		ds.ff->SetParameter(2, pp2);
 
 		for (double t : { 0.40, 0.45, 0.50 })
-		{
 			printf("t=%.2f --> f=%.4f\n", t, ds.ff->Eval(t));
-		}
 
 		return;
 	}
@@ -197,37 +178,20 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		return;
 	}
 
-	if (fitModel == "e012+e023")
+	if (fitModel.find("e012+e023") == 0)
 	{
-		const double t1 = (ds.t_dip + ds.t_min) / 2.;
-		const double t2 = ds.t_bmp;
+		double f = 0.5; // default
 
-		n_parameters = 6;
-
-		char buf[500];
-		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f)*(x-%.3f) + [5]*(x-%.3f)*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2, t2, t2, t2);
-		ds.ff = new TF1("ff", buf);
-
-		if (ds.name == "2.76TeV") { ds.ff->SetParameters(-3.47, -18.8, -14.9, -4.47, -10., 30.); ds.ff->SetParLimits(4, -100., 0.); ds.ff->SetParLimits(5, 0., 50.); }
-		if (ds.name == "7TeV") ds.ff->SetParameters(-3.31, -25.3, -6.27, -3.62, -22.6, 39.0);
-		if (ds.name == "8TeV") ds.ff->SetParameters(-3.24, -30.6, -56.7, -3.50, -22.8, 42.0);
-		if (ds.name == "13TeV") ds.ff->SetParameters(-2.70, -33.2, -67.9, -3.03, -20.6, 43.1);
-
-		return;
-	}
-
-	// e012_x.y+e023
-	if (fitModel.find("e012_") == 0 && fitModel.find("e023", 8) == 9)
-	{
-		double f = atof(fitModel.substr(5, 3).c_str());
-
-		printf("f = %.2f\n", f);
+		const auto pos = fitModel.find(":f=");
+		if (pos != string::npos)
+		{
+			f = atof(fitModel.substr(pos+3).c_str());
+			printf("f = %.2f\n", f);
+		}
 
 		const double t1 = ds.t_min * (1. - f) + ds.t_dip * f;
-		const double t1_ref = (ds.t_min + ds.t_dip) / 2.;
+		const double t1_def = (ds.t_min + ds.t_dip) / 2.;
 		const double t2 = ds.t_bmp;
-
-		printf("t1 = %.3f\n", t1);
 
 		n_parameters = 6;
 
@@ -235,20 +199,20 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f)*(x-%.3f) + [5]*(x-%.3f)*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2, t2, t2, t2);
 		ds.ff = new TF1("ff", buf);
 
-		// these are the parameters at t1_ref
+		// these are the parameters at f=0.5
 		if (ds.name == "2.76TeV") { ds.ff->SetParameters(-3.47, -18.8, -14.9, -4.47, -10., 30.); ds.ff->SetParLimits(4, -100., 0.); ds.ff->SetParLimits(5, 0., 50.); }
 		if (ds.name == "7TeV") ds.ff->SetParameters(-3.31, -25.3, -6.27, -3.62, -22.6, 39.0);
 		if (ds.name == "8TeV") ds.ff->SetParameters(-3.24, -30.6, -56.7, -3.50, -22.8, 42.0);
 		if (ds.name == "13TeV") ds.ff->SetParameters(-2.70, -33.2, -67.9, -3.03, -20.6, 43.1);
 
-		// do evolution from t1_ref to t1
+		// do evolution from t1_def to t1
 		const double p0 = ds.ff->GetParameter(0);
 		const double p1 = ds.ff->GetParameter(1);
 		const double p2 = ds.ff->GetParameter(2);
 
 		const double pp2 = p2;
-		const double pp1 = p1 - 2.*p2 * (t1_ref - t1);
-		const double pp0 = p0 - p1*t1_ref + pp1*t1 + p2 * (t1_ref*t1_ref - t1*t1);
+		const double pp1 = p1 - 2.*p2 * (t1_def - t1);
+		const double pp0 = p0 - p1*t1_def + pp1*t1 + p2 * (t1_def*t1_def - t1*t1);
 
 		ds.ff->SetParameter(0, pp0);
 		ds.ff->SetParameter(1, pp1);
@@ -318,37 +282,20 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		return;
 	}
 
-	if (fitModel == "e01+e023")
+	if (fitModel.find("e01+e023") == 0)
 	{
-		const double t1 = (ds.t_dip + ds.t_min) / 2.;
-		const double t2 = ds.t_bmp;
+		double f = 0.5; // default
 
-		n_parameters = 5;
-
-		char buf[500];
-		sprintf(buf, "exp([0] + [1]*(x-%.3f)) + exp([2] + [3]*(x-%.3f)*(x-%.3f) + [4]*(x-%.3f)*(x-%.3f)*(x-%.3f))", t1, t2, t2, t2, t2, t2);
-		ds.ff = new TF1("ff", buf);
-
-		if (ds.name == "2.76TeV") { ds.ff->SetParameters(-4.23, -18.9, -4.51, -10., 30.); ds.ff->SetParLimits(3, -100., 0.); ds.ff->SetParLimits(4, 0., 50.); }
-		if (ds.name == "7TeV") ds.ff->SetParameters(-4.08, -21.6, -3.64, -19.4, 99.4);
-		if (ds.name == "8TeV") ds.ff->SetParameters(-3.98, -26.1, -3.51, -23.5, 87.5);
-		if (ds.name == "13TeV") ds.ff->SetParameters(-3.76, -35.1, -3.03, -20.2, 55.0);
-
-		return;
-	}
-
-	// e01_x.y+e023
-	if (fitModel.find("e01_") == 0 && fitModel.find("e023", 7) == 8)
-	{
-		double f = atof(fitModel.substr(4, 3).c_str());
-
-		printf("f = %.2f\n", f);
+		const auto pos = fitModel.find(":f=");
+		if (pos != string::npos)
+		{
+			f = atof(fitModel.substr(pos+3).c_str());
+			printf("f = %.2f\n", f);
+		}
 
 		const double t1 = ds.t_min * (1. - f) + ds.t_dip * f;
-		const double t1_ref = (ds.t_min + ds.t_dip) / 2.;
+		const double t1_def = (ds.t_dip + ds.t_min) / 2.;
 		const double t2 = ds.t_bmp;
-
-		printf("t1 = %.3f\n", t1);
 
 		n_parameters = 5;
 
@@ -356,18 +303,18 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		sprintf(buf, "exp([0] + [1]*(x-%.3f)) + exp([2] + [3]*(x-%.3f)*(x-%.3f) + [4]*(x-%.3f)*(x-%.3f)*(x-%.3f))", t1, t2, t2, t2, t2, t2);
 		ds.ff = new TF1("ff", buf);
 
-		// these are the parameters at t1_ref
+		// these are the parameters for f=0.5
 		if (ds.name == "2.76TeV") { ds.ff->SetParameters(-4.23, -18.9, -4.51, -10., 30.); ds.ff->SetParLimits(3, -100., 0.); ds.ff->SetParLimits(4, 0., 50.); }
 		if (ds.name == "7TeV") ds.ff->SetParameters(-4.08, -21.6, -3.64, -19.4, 99.4);
 		if (ds.name == "8TeV") ds.ff->SetParameters(-3.98, -26.1, -3.51, -23.5, 87.5);
 		if (ds.name == "13TeV") ds.ff->SetParameters(-3.76, -35.1, -3.03, -20.2, 55.0);
 
-		// do evolution from t1_ref to t1
+		// do evolution from t1_def to t1
 		const double p0 = ds.ff->GetParameter(0);
 		const double p1 = ds.ff->GetParameter(1);
 
 		const double pp1 = p1;
-		const double pp0 = p0 - p1*t1_ref + pp1*t1;
+		const double pp0 = p0 - p1*t1_def + pp1*t1;
 
 		ds.ff->SetParameter(0, pp0);
 		ds.ff->SetParameter(1, pp1);
