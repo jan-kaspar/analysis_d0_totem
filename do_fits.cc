@@ -348,8 +348,7 @@ void BuildComponentPlots(const Dataset &ds, const string fitModel)
 	// define components
 	vector<TF1*> components;
 
-	// TODO
-	//if (fitModel == "e012+e012")
+	if (fitModel == "e012+e012" || fitModel == "e012+e023")
 	{
 		TF1 *ff_comp1 = new TF1(*ds.ff);
 		ff_comp1->SetName("g_comp1");
@@ -363,6 +362,38 @@ void BuildComponentPlots(const Dataset &ds, const string fitModel)
 		ff_comp2->SetParameter(0, -1E10);
 		ff_comp2->SetParameter(1, 0.);
 		ff_comp2->SetParameter(2, 0.);
+		components.push_back(ff_comp2);
+	}
+
+	if (fitModel == "e012+e02")
+	{
+		TF1 *ff_comp1 = new TF1(*ds.ff);
+		ff_comp1->SetName("g_comp1");
+		ff_comp1->SetParameter(3, -1E10);
+		ff_comp1->SetParameter(4, 0.);
+		components.push_back(ff_comp1);
+
+		TF1 *ff_comp2 = new TF1(*ds.ff);
+		ff_comp2->SetName("g_comp2");
+		ff_comp2->SetParameter(0, -1E10);
+		ff_comp2->SetParameter(1, 0.);
+		ff_comp2->SetParameter(2, 0.);
+		components.push_back(ff_comp2);
+	}
+
+	if (fitModel == "e01+e023")
+	{
+		TF1 *ff_comp1 = new TF1(*ds.ff);
+		ff_comp1->SetName("g_comp1");
+		ff_comp1->SetParameter(2, -1E10);
+		ff_comp1->SetParameter(3, 0.);
+		ff_comp1->SetParameter(4, 0.);
+		components.push_back(ff_comp1);
+
+		TF1 *ff_comp2 = new TF1(*ds.ff);
+		ff_comp2->SetName("g_comp2");
+		ff_comp2->SetParameter(0, -1E10);
+		ff_comp2->SetParameter(1, 0.);
 		components.push_back(ff_comp2);
 	}
 
@@ -487,7 +518,13 @@ int main(int argc, const char **argv)
 
 		for (int i = 0; i < n_parameters; ++i)
 		{
-			fitter.Config().ParSettings(i).Set(ds.ff->GetParName(i), ds.ff->GetParameter(i), fabs(ds.ff->GetParameter(i)) * 0.01);
+			double lim_min, lim_max;
+			ds.ff->GetParLimits(i, lim_min, lim_max);
+
+			if (lim_max > lim_min)
+				fitter.Config().ParSettings(i).Set(ds.ff->GetParName(i), ds.ff->GetParameter(i), fabs(ds.ff->GetParameter(i)) * 0.01, lim_min, lim_max);
+			else
+				fitter.Config().ParSettings(i).Set(ds.ff->GetParName(i), ds.ff->GetParameter(i), fabs(ds.ff->GetParameter(i)) * 0.01);
 		}
 
 		fitter.FitFCN();
