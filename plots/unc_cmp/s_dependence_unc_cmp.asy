@@ -3,9 +3,10 @@ import pad_layout;
 
 string topDir = "../../";
 
-string dir = "fits/e012+e012/first/";
+string dir = "fits/minimal/e01+e023/";
+//string dir = "fits/low_t,high_t/e012+e023/";
 
-int n_parameters = 6;
+int n_parameters = 5;
 
 string uncSpecs[] = {
 	"st",
