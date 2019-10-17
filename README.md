@@ -25,7 +25,8 @@ to apply the rules defined in `t_investigation.cc`.
 Run
 ```
 ./run_multiple
-``` to execute a series of fits. Edit the file to select the t-ranges, fit models and uncertainty models of your interest. The output is saved in directories
+```
+to execute a series of fits. Edit the file to select the t-ranges, fit models and uncertainty models of your interest. The output is saved in directories
 ```
 fits/<t_range>/<fit model>/<uncertainty>
 ```
