@@ -239,7 +239,7 @@ void SaveExtrapolation(const ROOT::Fit::FitResult &result, const string &extrapo
 		b(i) = par[n_parameters + i];
 	}
 
-	TVectorD p = EvaluateParameters(a, b, ds_ext.sqrt_s, extrapolationModel);
+	TVectorD p = EvaluateParameters(a, b, ds.sqrt_s, extrapolationModel);
 
 	// set extrapolated parameters to fit function
 	for (int i = 0; i < n_parameters; ++i)
@@ -298,7 +298,7 @@ void SaveExtrapolation(const ROOT::Fit::FitResult &result, const string &extrapo
 			b_mod(i) = par[n_parameters + i] + delta(n_parameters + i);
 		}
 
-		TVectorD p_mod = EvaluateParameters(a_mod, b_mod, ds_ext.sqrt_s, extrapolationModel);
+		TVectorD p_mod = EvaluateParameters(a_mod, b_mod, ds.sqrt_s, extrapolationModel);
 
 		// set extrapolated parameters to fit function
 		TF1 *ff_mod = new TF1(*ds.ff);
@@ -404,6 +404,12 @@ int main(int argc, const char **argv)
 	// prepare datasets
 	InitDatasets();
 
+	for (auto &ds : datasets)
+	{
+		BuildTRanges(tRange, ds);
+		BuildFitFunction(fitModel, ds);
+	}
+
 	BuildTRanges(tRange, ds_ext);
 	BuildFitFunction(fitModel, ds_ext);
 
@@ -465,6 +471,13 @@ int main(int argc, const char **argv)
 			SaveFitPlots(result, extrapolationModel);
 
 			SaveExtrapolation(result, extrapolationModel, ds_ext);
+
+			for (const auto &ds : datasets)
+			{
+				gDirectory = d_ucm->mkdir(ds.name.c_str());
+
+				SaveExtrapolation(result, extrapolationModel, ds);
+			}
 		}
 	}
 
