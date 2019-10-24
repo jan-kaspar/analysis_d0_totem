@@ -138,6 +138,13 @@ double S2_FCN::operator() (const double *par) const
 		}
 	}
 
+	// add constraints
+	for (const auto &p : ds->constraints)
+	{
+		double rd = (par[p.first] - p.second.mean) / p.second.sigma;
+		S2 += rd*rd;
+	}
+
 	return S2;
 }
 
@@ -194,6 +201,33 @@ void SaveFitResults(const ROOT::Fit::FitResult &result)
 	V.Write("par_V");
 	C.Write("par_C");
 	h2_C->Write();
+}
+
+//----------------------------------------------------------------------------------------------------
+
+void AnalyzeFit(const Dataset &ds, double &t_dip, double &dsdt_dip, double &t_bmp, double &dsdt_bmp)
+{
+	dsdt_dip = 1E100;
+	for (double t = (ds.t_min + ds.t_dip)/2.; t < (ds.t_dip + ds.t_bmp)/2.; t += 0.001)
+	{
+		const double dsdt = ds.ff->Eval(t);
+		if (dsdt < dsdt_dip)
+		{
+			dsdt_dip = dsdt;
+			t_dip = t;
+		}
+	}
+
+	dsdt_bmp = -1E100;
+	for (double t = (ds.t_dip + ds.t_bmp)/2.; t < (ds.t_bmp + ds.t_max)/2.; t += 0.001)
+	{
+		const double dsdt = ds.ff->Eval(t);
+		if (dsdt > dsdt_bmp)
+		{
+			dsdt_bmp = dsdt;
+			t_bmp = t;
+		}
+	}
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -549,11 +583,18 @@ int main(int argc, const char **argv)
 
 		SaveFitResults(result);
 
+		double t_dip, dsdt_dip;
+		double t_bmp, dsdt_bmp;
+		AnalyzeFit(ds, t_dip, dsdt_dip, t_bmp, dsdt_bmp);
+
 		int ndf = id.binData.size() - n_parameters;
 		TGraph *g_data = new TGraph();
 		g_data->SetPoint(0, ds.t_min, ds.t_max);
 		g_data->SetPoint(1, id.binData.size(), ndf);
 		g_data->SetPoint(2, result.Chi2(), result.Chi2() / ndf);
+		g_data->SetPoint(3, TMath::Prob(result.Chi2(), ndf), 0.);
+		g_data->SetPoint(4, t_dip, dsdt_dip);
+		g_data->SetPoint(5, t_bmp, dsdt_bmp);
 		g_data->Write("g_data");
 
 		BuildUncertaintyBand(ds, result);
