@@ -28,7 +28,11 @@ for (int ri : results.keys)
 {
 	NewRow();
 
-	NewPadLabel(replace(results[ri], "_", "\_"));
+	string l = "\vbox{\SetFontSizesXX";
+	for (string e : split(results[ri], "/"))
+		l += "\hbox{" + replace(e, "_", "\_") + "}";
+	l += "}";
+	NewPadLabel(l);
 
 	for (int dsi : datasets.keys)
 	{
@@ -44,7 +48,7 @@ for (int ri : results.keys)
 		string base = extModel + "/" + extFit + "/" + datasets[dsi];
 		draw(RootGetObject(f, base + "/g_dsdt_ext"), "l", red, "parameter $s$-evolution");
 
-		limits((0.3, 4e-3), (0.9, 4e-1), Crop);
+		limits((0.3, 4e-3), (1.0, 5e-1), Crop);
 	}
 
 	AttachLegend(BuildLegend(NW), NE);

@@ -7,8 +7,8 @@ string top_dir = "../../";
 
 string methods[];
 methods.push("minimal");
-methods.push("low_t");
-methods.push("high_t");
+//methods.push("low_t");
+//methods.push("high_t");
 methods.push("low_t,high_t");
 
 TGraph_errorBar = None;
@@ -34,9 +34,9 @@ for (int mi : methods.keys)
 
 		string f = top_dir + "data/TOTEM_" + datasets[dsi] + "/data.root";
 		RootObject g_dsdt = RootGetObject(f, "g_dsdt");
-		RootObject f_fit = RootGetObject(f, "f_dsdt");
 
-		string f = top_dir + "t_ranges/t_investigation.root";
+		string f = top_dir + "t_ranges/t_investigation_new.root";
+		RootObject g_fit = RootGetObject(f, methods[mi] + "/" + datasets[dsi] + "/g_fit");
 		RootObject g_data = RootGetObject(f, methods[mi] + "/" + datasets[dsi] + "/g_data");
 
 		real ax[] = {0.};
@@ -79,11 +79,11 @@ for (int mi : methods.keys)
 		draw(Scale((t_max, dsdt_max * f_y_dw))--Scale((t_max, dsdt_max * f_y_up)), magenta+1.3pt);
 		draw(Scale((t_bmp + dt_dw, dsdt_max))--Scale((t_max + dt_up, dsdt_max)), magenta+1.3pt);
 
-		draw(f_fit, "l", black+1pt);
+		draw(g_fit, "l", black+1pt);
 		draw(g_dsdt, "p", blue, mCi+0.5pt);
 
 		limits((t_min-0.05, dsdt_dip*0.7), (t_max+0.05, dsdt_min*1.5), Crop);
 	}
 }
 
-GShipout(hSkip=1mm);
+GShipout(hSkip=1mm, vSkip=1mm);

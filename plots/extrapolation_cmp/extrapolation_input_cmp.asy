@@ -20,14 +20,27 @@ for (int ri : results.keys)
 {
 	NewRow();
 
-	NewPadLabel(replace(results[ri], "_", "\_"));
+	string l = "\vbox{\SetFontSizesXX";
+	for (string e : split(results[ri], "/"))
+		l += "\hbox{" + replace(e, "_", "\_") + "}";
+	l += "}";
+	NewPadLabel(l);
 
 	for (int mode = 0; mode < 2; ++mode)
 	{
 		NewPad("$|t|\ung{GeV^2}$", "$\d\si/\d t\ung{mb/GeV}$");
 		scale(Linear, Log);
 
+		// draw extrapolation
+		AddToLegend("<extraplation to D0 energy:");
+		string f = topDir + "fits/" + results[ri] + "/s_extrapolation.root";
+		string base = extModel + "/" + extFit;
+		draw(RootGetObject(f, base + "/g_dsdt_ext"), "l", black, "central");
+		draw(RootGetObject(f, base + "/g_dsdt_ext_pl_unc"), "l", black+dashed, "uncertainty");
+		draw(RootGetObject(f, base + "/g_dsdt_ext_mi_unc"), "l", black+dashed);
+
 		// draw input
+		AddToLegend("<input for extrapolation:");
 		string f = topDir + "fits/" + results[ri] + "/do_fits.root";
 		for (int dsi : datasets.keys)
 		{
@@ -42,12 +55,7 @@ for (int ri : results.keys)
 				draw(RootGetObject(f, obj_pth), "l", p, d_labels[dsi]);
 		}
 
-		// draw extrapolation
-		string f = topDir + "fits/" + results[ri] + "/s_extrapolation.root";
-		string base = extModel + "/" + extFit;
-		draw(RootGetObject(f, base + "/g_dsdt_ext"), "l", black, "D0 energy");
-
-		limits((0.3, 4e-3), (0.9, 4e-1), Crop);
+		limits((0.3, 4e-3), (1.0, 5e-1), Crop);
 
 		if (mode == 1)
 			AttachLegend(NW, NE);

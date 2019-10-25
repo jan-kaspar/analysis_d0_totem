@@ -7,8 +7,6 @@ string top_dir = "../../";
 
 string methods[];
 methods.push("minimal");
-methods.push("low_t");
-methods.push("high_t");
 methods.push("low_t,high_t");
 
 string quantities[], q_labels[];
@@ -30,22 +28,26 @@ for (int mi : methods.keys)
 	for (int qi : quantities.keys)
 	{
 		NewPad("$\sqrt s\ung{GeV}$", q_labels[qi]);
+		scale(Log, Linear);
 
-		string f = top_dir + "t_ranges/t_investigation.root";
+		string f = top_dir + "t_ranges/t_investigation_new.root";
 		RootObject graph = RootGetObject(f, methods[mi] + "/g_" + quantities[qi] + "_vs_sqrt_s");
-		RootObject fit = RootGetObject(f, methods[mi] + "/g_" + quantities[qi] + "_vs_sqrt_s|ff");
+		RootObject fit_lin = RootGetObject(f, methods[mi] + "/g_" + quantities[qi] + "_vs_sqrt_s|ff_lin");
+		RootObject fit_log = RootGetObject(f, methods[mi] + "/g_" + quantities[qi] + "_vs_sqrt_s|ff_log");
 
 		draw(graph, "p", black, mCi+2pt+black);
-		draw(fit, "l", red+1pt);
+		draw(fit_log, "l", red+1pt);
+		draw(fit_lin, "l", red+dashed);
 
+		RootObject fit = fit_log;
 		real ext_sqrt_s = fit.rExec("GetParameter", 2);
 		real ext_q = fit.rExec("GetParameter", 0);
 		real ext_q_unc = fit.rExec("GetParError", 0);
 
 		string l = format("$%.3f", ext_q) + format("\pm %.3f$", ext_q_unc);
 
-		draw((ext_sqrt_s, ext_q), heavygreen, l, mCi+3pt+heavygreen);
-		draw((ext_sqrt_s, ext_q-ext_q_unc)--(ext_sqrt_s, ext_q+ext_q_unc), heavygreen);
+		draw(Scale((ext_sqrt_s, ext_q)), heavygreen, l, mCi+3pt+heavygreen);
+		draw(Scale((ext_sqrt_s, ext_q-ext_q_unc))--Scale((ext_sqrt_s, ext_q+ext_q_unc)), heavygreen);
 
 		xlimits(1, 14, Crop);
 
@@ -53,4 +55,4 @@ for (int mi : methods.keys)
 	}
 }
 
-GShipout(hSkip=1mm);
+GShipout(hSkip=1mm, vSkip=1mm);

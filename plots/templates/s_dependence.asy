@@ -59,6 +59,9 @@ for (int pari = 0; pari < n_parameters; ++pari)
 				xlimits(1., 14., Crop);
 			*/
 
+			if (pari == 4)
+				currentpad.yTicks = RightTicks(10., 2.);
+
 			yaxis(XEquals(sqrt_s_ext, false), heavygreen);
 		}
 	}

@@ -78,3 +78,7 @@ for (int eni : energies.keys)
 	AddToLegend(energies[eni], e_pens[eni]);
 
 AttachLegend();
+
+//----------------------------------------------------------------------------------------------------
+
+GShipout(hSkip=5mm, vSkip=1mm);
