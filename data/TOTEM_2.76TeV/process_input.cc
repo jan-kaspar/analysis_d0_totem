@@ -12,13 +12,13 @@ using namespace std;
 
 //----------------------------------------------------------------------------------------------------
 
-int main()
+void ProcessOne(const string &inputFile, const string &outputFile, bool highT)
 {
 	// get input
-	FILE *f_in = fopen("from_preprint_13sigma.txt", "r");
+	FILE *f_in = fopen(inputFile.c_str(), "r");
 
 	// prepare output
-	TFile *f_out = TFile::Open("data.root", "recreate");
+	TFile *f_out = TFile::Open(outputFile.c_str(), "recreate");
 
 	TGraphErrors *g_dsdt = new TGraphErrors();
 
@@ -54,17 +54,31 @@ int main()
 	}
 
 	// make fit
-	TF1 *ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x + [3]*x*x*x) + exp([4] + [5]*x + [6]*x*x + [7]*x*x*x)");
-	ff->SetParameters(
-		6.75, -19.3, 0., 0.,
-		-116., 319., -228., 0.
-	);
-	ff->FixParameter(2, 0.);
-	ff->FixParameter(3, 0.);
-	ff->FixParameter(7, 0.);
-	ff->SetRange(0.35, 0.9);
+	TF1 *ff = NULL;
 
-	g_dsdt->Fit(ff, "", "", 0.35, 0.8);
+	if (highT)
+	{
+		ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x + [3]*x*x*x) + exp([4] + [5]*x + [6]*x*x + [7]*x*x*x)");
+		ff->SetParameters(
+			6.75, -19.3, 0., 0.,
+			-116., 319., -228., 0.
+		);
+		ff->FixParameter(2, 0.);
+		ff->FixParameter(3, 0.);
+		ff->FixParameter(7, 0.);
+		ff->SetRange(0.35, 0.9);
+
+		g_dsdt->Fit(ff, "", "", 0.35, 0.8);
+	} else {
+		ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x)");
+		ff->SetParameters(
+			6.75, -19.3, 0.
+		);
+		//ff->FixParameter(2, 0.);
+		ff->SetRange(0.06, 0.47);
+
+		g_dsdt->Fit(ff, "", "", 0.06, 0.47);
+	}
 
 	g_dsdt->Write("g_dsdt");
 	ff->Write("f_dsdt");
@@ -116,6 +130,15 @@ int main()
 	fclose(f_in);
 
 	delete f_out;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+int main()
+{
+	ProcessOne("from_preprint_4sigma.txt", "data_4sigma.root", false);
+
+	ProcessOne("from_preprint_13sigma.txt", "data.root", true);
 
 	return 0;
 }
