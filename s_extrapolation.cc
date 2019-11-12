@@ -18,6 +18,10 @@ using namespace std;
 
 //----------------------------------------------------------------------------------------------------
 
+int n_ff_parameters;
+
+//----------------------------------------------------------------------------------------------------
+
 struct Constraint
 {
 	double sqrt_s;
@@ -67,11 +71,11 @@ double S2_FCN::operator() (const double *par) const
 {
 	double S2 = 0.;
 
-	TVectorD a(n_parameters), b(n_parameters);
-	for (int i = 0; i < n_parameters; ++i)
+	TVectorD a(n_ff_parameters), b(n_ff_parameters);
+	for (int i = 0; i < n_ff_parameters; ++i)
 	{
 		a(i) = par[i];
-		b(i) = par[n_parameters + i];
+		b(i) = par[n_ff_parameters + i];
 	}
 
 	for (const auto &cnt : constraints)
@@ -80,9 +84,9 @@ double S2_FCN::operator() (const double *par) const
 
 		TVectorD diff = p - cnt.par;
 
-		for (int i = 0; i < n_parameters; i++)
+		for (int i = 0; i < n_ff_parameters; i++)
 		{
-			for (int j = 0; j < n_parameters; j++)
+			for (int j = 0; j < n_ff_parameters; j++)
 			{
 				if (useCorrelationMatrix == false && (i != j))
 					continue;
@@ -102,17 +106,17 @@ void SaveFitPlots(const ROOT::Fit::FitResult &result, const string &extrapolatio
 	// calculate extrapolated parameters
 	const double *par = result.GetParams();
 
-	TVectorD a(n_parameters), b(n_parameters);
-	for (int i = 0; i < n_parameters; ++i)
+	TVectorD a(n_ff_parameters), b(n_ff_parameters);
+	for (int i = 0; i < n_ff_parameters; ++i)
 	{
 		a(i) = par[i];
-		b(i) = par[n_parameters + i];
+		b(i) = par[n_ff_parameters + i];
 	}
 
 	// prepare graph vectors
 	vector<TGraphErrors *> vg_cnt;
 	vector<TGraph *> vg_fit, vg_fit_pl_unc, vg_fit_mi_unc;
-	for (int i = 0; i < n_parameters; ++i)
+	for (int i = 0; i < n_ff_parameters; ++i)
 	{
 		TGraphErrors *ge = new TGraphErrors(); ge->SetName("g_cnt"); vg_cnt.push_back(ge);
 
@@ -123,7 +127,7 @@ void SaveFitPlots(const ROOT::Fit::FitResult &result, const string &extrapolatio
 	}
 
 	// make graph of data points (constraints)
-	for (int i = 0; i < n_parameters; ++i)
+	for (int i = 0; i < n_ff_parameters; ++i)
 	{
 		for (const auto &cnt : constraints)
 		{
@@ -154,7 +158,7 @@ void SaveFitPlots(const ROOT::Fit::FitResult &result, const string &extrapolatio
 		TVectorD p = EvaluateParameters(a, b, W, extrapolationModel);
 
 		// add point to graphs
-		for (int i = 0; i < n_parameters; ++i)
+		for (int i = 0; i < n_ff_parameters; ++i)
 		{
 			int idx = vg_fit[i]->GetN();
 			vg_fit[i]->SetPoint(idx, W, p(i));
@@ -162,7 +166,7 @@ void SaveFitPlots(const ROOT::Fit::FitResult &result, const string &extrapolatio
 	}
 
 	// sample fit uncertainty
-	vector<Stat> st(vg_fit[0]->GetN(), Stat(n_parameters));
+	vector<Stat> st(vg_fit[0]->GetN(), Stat(n_ff_parameters));
 
 	const unsigned int n_repetitions = 100;
 	for (unsigned int ir = 0; ir < n_repetitions; ++ir)
@@ -173,11 +177,11 @@ void SaveFitPlots(const ROOT::Fit::FitResult &result, const string &extrapolatio
 			rdm(i) = gRandom->Gaus();
 		delta = m_gen * rdm;
 
-		TVectorD a_mod(n_parameters), b_mod(n_parameters);
-		for (int i = 0; i < n_parameters; ++i)
+		TVectorD a_mod(n_ff_parameters), b_mod(n_ff_parameters);
+		for (int i = 0; i < n_ff_parameters; ++i)
 		{
 			a_mod(i) = par[i] + delta(i);
-			b_mod(i) = par[n_parameters + i] + delta(n_parameters + i);
+			b_mod(i) = par[n_ff_parameters + i] + delta(n_ff_parameters + i);
 		}
 
 		// sample biased parameters at different energy values
@@ -191,7 +195,7 @@ void SaveFitPlots(const ROOT::Fit::FitResult &result, const string &extrapolatio
 		}
 	}
 
-	for (int i = 0; i < n_parameters; ++i)
+	for (int i = 0; i < n_ff_parameters; ++i)
 	{
 		for (int iw = 0; iw < vg_fit[i]->GetN(); ++iw)
 		{
@@ -204,7 +208,7 @@ void SaveFitPlots(const ROOT::Fit::FitResult &result, const string &extrapolatio
 	}
 
 	// save plots
-	for (int i = 0; i < n_parameters; ++i)
+	for (int i = 0; i < n_ff_parameters; ++i)
 	{
 		char buf[100];
 		sprintf(buf, "c_par%i", i);
@@ -232,17 +236,17 @@ void SaveExtrapolation(const ROOT::Fit::FitResult &result, const string &extrapo
 	// calculate extrapolated parameters
 	const double *par = result.GetParams();
 
-	TVectorD a(n_parameters), b(n_parameters);
-	for (int i = 0; i < n_parameters; ++i)
+	TVectorD a(n_ff_parameters), b(n_ff_parameters);
+	for (int i = 0; i < n_ff_parameters; ++i)
 	{
 		a(i) = par[i];
-		b(i) = par[n_parameters + i];
+		b(i) = par[n_ff_parameters + i];
 	}
 
 	TVectorD p = EvaluateParameters(a, b, ds.sqrt_s, extrapolationModel);
 
 	// set extrapolated parameters to fit function
-	for (int i = 0; i < n_parameters; ++i)
+	for (int i = 0; i < n_ff_parameters; ++i)
 		ds.ff->SetParameter(i, p(i));
 
 	// evaluate extrapolated graph
@@ -291,11 +295,11 @@ void SaveExtrapolation(const ROOT::Fit::FitResult &result, const string &extrapo
 			rdm(i) = gRandom->Gaus();
 		delta = m_gen * rdm;
 
-		TVectorD a_mod(n_parameters), b_mod(n_parameters);
-		for (int i = 0; i < n_parameters; ++i)
+		TVectorD a_mod(n_ff_parameters), b_mod(n_ff_parameters);
+		for (int i = 0; i < n_ff_parameters; ++i)
 		{
 			a_mod(i) = par[i] + delta(i);
-			b_mod(i) = par[n_parameters + i] + delta(n_parameters + i);
+			b_mod(i) = par[n_ff_parameters + i] + delta(n_ff_parameters + i);
 		}
 
 		TVectorD p_mod = EvaluateParameters(a_mod, b_mod, ds.sqrt_s, extrapolationModel);
@@ -303,7 +307,7 @@ void SaveExtrapolation(const ROOT::Fit::FitResult &result, const string &extrapo
 		// set extrapolated parameters to fit function
 		TF1 *ff_mod = new TF1(*ds.ff);
 
-		for (int i = 0; i < n_parameters; ++i)
+		for (int i = 0; i < n_ff_parameters; ++i)
 			ff_mod->SetParameter(i, p_mod(i));
 
 		// sample biased extrapolation
@@ -413,6 +417,8 @@ int main(int argc, const char **argv)
 	BuildTRanges(tRange, ds_ext);
 	BuildFitFunction(fitModel, ds_ext);
 
+	n_ff_parameters = datasets.front().ff->GetNpar();
+
 	// get input
 	TFile *f_in = TFile::Open("do_fits.root");
 
@@ -448,10 +454,10 @@ int main(int argc, const char **argv)
 			s2Fcn.extrapolationModel = extrapolationModel;
 			s2Fcn.useCorrelationMatrix = useCorrelationMatrix;
 			
-			double pStart[n_parameters];
-  			fitter.SetFCN(2*n_parameters, s2Fcn, pStart, 0, true);
+			double pStart[2*n_ff_parameters];
+  			fitter.SetFCN(2*n_ff_parameters, s2Fcn, pStart, 0, true);
 
-			for (int i = 0; i < n_parameters; i++)
+			for (int i = 0; i < n_ff_parameters; i++)
 			{
 				char buf[100];
 
@@ -459,7 +465,7 @@ int main(int argc, const char **argv)
 				fitter.Config().ParSettings(i).Set(buf, 1., 1.);
 
 				sprintf(buf, "b%i", i);
-				fitter.Config().ParSettings(n_parameters + i).Set(buf, 0., 1.);
+				fitter.Config().ParSettings(n_ff_parameters + i).Set(buf, 0., 1.);
 			}
 
 			// run fit

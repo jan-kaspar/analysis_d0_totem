@@ -545,7 +545,7 @@ int main(int argc, const char **argv)
 	TFile *f_out = TFile::Open("do_fits.root", "recreate");
 
 	TGraph *g_settings = new TGraph();
-	g_settings->SetPoint(0, n_parameters, 0.);
+	g_settings->SetPoint(0, datasets.front().ff->GetNpar(), 0.);
 	g_settings->Write("g_settings");
 
 	// start processing
@@ -566,14 +566,14 @@ int main(int argc, const char **argv)
 		s2Fcn.ds = &ds;
 		s2Fcn.id = &id;
 
-		int n_parameters = ds.ff->GetNpar();
+		int n_ff_parameters = ds.ff->GetNpar();
 
-		double pStart[n_parameters+1];
-		fitter.SetFCN(n_parameters+1, s2Fcn, pStart, 0, true);
+		double pStart[n_ff_parameters+1];
+		fitter.SetFCN(n_ff_parameters+1, s2Fcn, pStart, 0, true);
 
 		fitter.Config().ParSettings(0).Set("eta", 1., (useNormUnc) ? id.eta_unc : 1E-6);
 
-		for (int i = 0; i < n_parameters; ++i)
+		for (int i = 0; i < n_ff_parameters; ++i)
 		{
 			double lim_min, lim_max;
 			ds.ff->GetParLimits(i, lim_min, lim_max);
@@ -617,7 +617,7 @@ int main(int argc, const char **argv)
 		AnalyzeFit(ds, t_dip, dsdt_dip, t_bmp, dsdt_bmp);
 
 		int data_points = id.binData.size() + 1;
-		int fit_parameters = n_parameters + 1;
+		int fit_parameters = n_ff_parameters + 1;
 		int ndf = data_points - fit_parameters;
 
 		TGraph *g_data = new TGraph();

@@ -127,8 +127,6 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 
 //----------------------------------------------------------------------------------------------------
 
-int n_parameters = 0;
-
 void BuildFitFunction(const string fitModel, Dataset &ds)
 {
 	printf("\n>> BuildFitFunction(%s, %s)\n", fitModel.c_str(), ds.name.c_str());
@@ -178,8 +176,6 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		const double t1_def = (ds.t_min + ds.t_dip) / 2.;
 		const double t2 = ds.t_bmp;
 
-		n_parameters = 6;
-
 		char buf[500];
 		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f) + [5]*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2, t2);
 		ds.ff = new TF1("ff", buf);
@@ -214,8 +210,6 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		const double t1 = (ds.t_dip + ds.t_min) / 2.;
 		const double t2 = ds.t_bmp;
 
-		n_parameters = 7;
-
 		char buf[500];
 		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f) + [5]*(x-%.3f)*(x-%.3f) + [6]*(x-%.3f)*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2, t2, t2, t2, t2);
 		ds.ff = new TF1("ff", buf);
@@ -242,8 +236,6 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		const double t1 = ds.t_min * (1. - f) + ds.t_dip * f;
 		const double t1_def = (ds.t_min + ds.t_dip) / 2.;
 		const double t2 = ds.t_bmp;
-
-		n_parameters = 6;
 
 		char buf[500];
 		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f)*(x-%.3f) + [5]*(x-%.3f)*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2, t2, t2, t2);
@@ -280,8 +272,6 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		//const double t2 = (ds.t_max + ds.t_dip) / 2.;
 		const double t2 = ds.t_bmp;
 
-		n_parameters = 5;
-
 		char buf[500];
 		sprintf(buf, "exp([0] + [1]*(x-%.3f) + [2]*(x-%.3f)*(x-%.3f)) + exp([3] + [4]*(x-%.3f)*(x-%.3f))", t1, t1, t1, t2, t2);
 		ds.ff = new TF1("ff", buf);
@@ -299,8 +289,6 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		const double t1 = (ds.t_dip + ds.t_min) / 2.;
 		const double t2 = ds.t_bmp;
 
-		n_parameters = 5;
-
 		char buf[500];
 		sprintf(buf, "exp([0] + [1]*(x-%.3f)) + exp([2] + [3]*(x-%.3f) + [4]*(x-%.3f)*(x-%.3f))", t1, t2, t2, t2);
 		ds.ff = new TF1("ff", buf);
@@ -317,8 +305,6 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 	{
 		const double t1 = (ds.t_dip + ds.t_min) / 2.;
 		const double t2 = ds.t_bmp;
-
-		n_parameters = 4;
 
 		char buf[500];
 		sprintf(buf, "exp([0] + [1]*(x-%.3f)) + exp([2] + [4]*(x-%.3f)*(x-%.3f))", t1, t2, t2);
@@ -346,8 +332,6 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		const double t1 = ds.t_min * (1. - f) + ds.t_dip * f;
 		const double t1_def = (ds.t_dip + ds.t_min) / 2.;
 		const double t2 = ds.t_bmp;
-
-		n_parameters = 5;
 
 		char buf[500];
 		sprintf(buf, "exp([0] + [1]*(x-%.3f)) + exp([2] + [3]*(x-%.3f)*(x-%.3f) + [4]*(x-%.3f)*(x-%.3f)*(x-%.3f))", t1, t2, t2, t2, t2, t2);
@@ -377,8 +361,6 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 
 	if (fitModel == "e01-int-e01")
 	{
-		n_parameters = 5;
-
 		char buf[500];
 		sprintf(buf, "exp(2*[0] + 2*[1]*(x-%.3f)) + exp(2*[2] + 2*[3]*(x-%.3f)) - 2 *cos([4]) * exp( [0] + [1]*(x-%.3f) + [2] + [3]*(x-%.3f) )",
 			ds.t_dip, ds.t_dip, ds.t_dip, ds.t_dip);
