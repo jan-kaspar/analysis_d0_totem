@@ -299,8 +299,7 @@ void BuildUncertaintyBand(const Dataset &ds, const ROOT::Fit::FitResult &result)
 		const double dsdt_mod_at_t_max = eta * ff_mod->Eval(ds.t_max);
 		const bool accept = (
 			fabs(dsdt_mod_at_t_min - dsdt_at_t_min) / dsdt_at_t_min < 2.0
-			// TODO: reduce to 2.0 ???
-			&& fabs(dsdt_mod_at_t_max - dsdt_at_t_max) / dsdt_at_t_max < 5.0
+			&& fabs(dsdt_mod_at_t_max - dsdt_at_t_max) / dsdt_at_t_max < 2.0
 		);
 
 		if (!accept)
