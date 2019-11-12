@@ -36,6 +36,8 @@ struct InputData
 
 	TMatrixDSym m_cov;
 	TMatrixDSym m_cov_inv;
+
+	double eta_unc;
 };
 
 //----------------------------------------------------------------------------------------------------
@@ -52,6 +54,9 @@ void LoadInput(const Dataset &ds, InputData &id)
 	TGraph *g_dsdt = (TGraph *) f_in->Get("g_dsdt");
 	TMatrixDSym *m_dsdt_cov_syst_t_dep = (TMatrixDSym *) f_in->Get("m_dsdt_cov_syst_t_dep");
 	TVectorD *v_dsdt_syst_t_indep = (TVectorD *) f_in->Get("v_dsdt_syst_t_indep");
+	TVectorD *v_rel_syst_t_indep = (TVectorD *) f_in->Get("v_rel_syst_t_indep");
+
+	id.eta_unc = (*v_rel_syst_t_indep)(0);
 
 	// get bin data
 	double t_min_eff = ds.t_min;
@@ -89,7 +94,9 @@ void LoadInput(const Dataset &ds, InputData &id)
 			id.m_cov(i, j) = 0.;
 			if (useStatUnc) id.m_cov(i, j) += con_stat;
 			if (useSystUnc) id.m_cov(i, j) += con_syst_t_dep;
-			if (useNormUnc) id.m_cov(i, j) += con_syst_t_indep;
+
+			// normalisation uncertainty handled with its nuissance parameter (eta)
+			//if (useNormUnc) id.m_cov(i, j) += con_syst_t_indep;
 
 			if (i == j)
 			{
@@ -123,12 +130,18 @@ class S2_FCN
 
 double S2_FCN::operator() (const double *par) const
 {
-	ds->ff->SetParameters(par);
+	// transfer parameters to function
+	const double eta = par[0];
 
+	for (int i = 0; i < ds->ff->GetNpar(); ++i)
+		ds->ff->SetParameter(i, par[i+1]);
+
+	// evaluate difference for each bin
 	vector<double> diff(id->binData.size());
 	for (unsigned int i = 0; i < diff.size(); ++i)
-		diff[i] = id->binData[i].dsdt - ds->ff->Eval(id->binData[i].t);
+		diff[i] = id->binData[i].dsdt - eta * ds->ff->Eval(id->binData[i].t);
 
+	// calculate chi^2 from bins
 	double S2 = 0.;
 	for (unsigned int i = 0; i < diff.size(); ++i)
 	{
@@ -138,10 +151,15 @@ double S2_FCN::operator() (const double *par) const
 		}
 	}
 
+	// add normalisation constraint
+	const double eta_unc_eff = (useNormUnc) ? id->eta_unc : 1E-6;
+	const double ed = (eta - 1.) / eta_unc_eff;
+	S2 += ed*ed;
+
 	// add constraints
 	for (const auto &p : ds->constraints)
 	{
-		double rd = (par[p.first] - p.second.mean) / p.second.sigma;
+		double rd = (par[p.first + 1] - p.second.mean) / p.second.sigma;
 		S2 += rd*rd;
 	}
 
@@ -177,7 +195,8 @@ void SaveInputPlots(const Dataset &ds, const InputData &id)
 
 void SaveFitResults(const ROOT::Fit::FitResult &result)
 {
-	int dim = result.NPar();
+	// number of fit-function parameters
+	int dim = result.NPar() - 1;
 
 	TVectorD p(dim);
 	TMatrixDSym V(dim);
@@ -187,12 +206,12 @@ void SaveFitResults(const ROOT::Fit::FitResult &result)
 
 	for (int i = 0; i < dim; ++i)
 	{
-		p(i) = result.Parameter(i);
+		p(i) = result.Parameter(i+1);
 
 		for (int j = 0; j < dim; ++j)
 		{
-			V(i, j) = result.CovMatrix(i, j);
-			C(i, j) = result.Correlation(i, j);
+			V(i, j) = result.CovMatrix(i+1, j+1);
+			C(i, j) = result.Correlation(i+1, j+1);
 			h2_C->SetBinContent(i+1, j+1, C(i, j));
 		}
 	}
@@ -270,14 +289,17 @@ void BuildUncertaintyBand(const Dataset &ds, const ROOT::Fit::FitResult &result)
 
 		TF1 *ff_mod = new TF1(*ds.ff);
 
-		for (int i = 0; i < V.GetNrows(); i++)
-			ff_mod->SetParameter(i, ff_mod->GetParameter(i) + delta(i));
+		const double eta = 1.; // want to check effect of uncertainty of the fit function only
+
+		for (int i = 0; i < ff_mod->GetNpar(); i++)
+			ff_mod->SetParameter(i, ff_mod->GetParameter(i) + delta(i+1));
 		
 		// acceptable configuration ?
-		const double dsdt_mod_at_t_min = ff_mod->Eval(ds.t_min);
-		const double dsdt_mod_at_t_max = ff_mod->Eval(ds.t_max);
+		const double dsdt_mod_at_t_min = eta * ff_mod->Eval(ds.t_min);
+		const double dsdt_mod_at_t_max = eta * ff_mod->Eval(ds.t_max);
 		const bool accept = (
 			fabs(dsdt_mod_at_t_min - dsdt_at_t_min) / dsdt_at_t_min < 2.0
+			// TODO: reduce to 2.0 ???
 			&& fabs(dsdt_mod_at_t_max - dsdt_at_t_max) / dsdt_at_t_max < 5.0
 		);
 
@@ -288,7 +310,7 @@ void BuildUncertaintyBand(const Dataset &ds, const ROOT::Fit::FitResult &result)
 		for (unsigned int i = 0; i < n_points; ++i)
 		{
 			const double t = ds.t_min + (ds.t_max - ds.t_min) / (n_points - 1) * i;
-			const double f_dsdt = ff_mod->Eval(t);
+			const double f_dsdt = eta * ff_mod->Eval(t);
 
 			stat[i].Fill(f_dsdt);
 
@@ -538,7 +560,7 @@ int main(int argc, const char **argv)
 		InputData id;
 		LoadInput(ds, id);
 
-		// do fit
+		// initialise fitter
 		ROOT::Fit::Fitter fitter;
 
 		S2_FCN s2Fcn;
@@ -547,8 +569,10 @@ int main(int argc, const char **argv)
 
 		int n_parameters = ds.ff->GetNpar();
 
-		double pStart[n_parameters];
-		fitter.SetFCN(n_parameters, s2Fcn, pStart, 0, true);
+		double pStart[n_parameters+1];
+		fitter.SetFCN(n_parameters+1, s2Fcn, pStart, 0, true);
+
+		fitter.Config().ParSettings(0).Set("eta", 1., (useNormUnc) ? id.eta_unc : 1E-6);
 
 		for (int i = 0; i < n_parameters; ++i)
 		{
@@ -556,11 +580,12 @@ int main(int argc, const char **argv)
 			ds.ff->GetParLimits(i, lim_min, lim_max);
 
 			if (lim_max > lim_min)
-				fitter.Config().ParSettings(i).Set(ds.ff->GetParName(i), ds.ff->GetParameter(i), fabs(ds.ff->GetParameter(i)) * 0.01, lim_min, lim_max);
+				fitter.Config().ParSettings(i+1).Set(ds.ff->GetParName(i), ds.ff->GetParameter(i), fabs(ds.ff->GetParameter(i)) * 0.01, lim_min, lim_max);
 			else
-				fitter.Config().ParSettings(i).Set(ds.ff->GetParName(i), ds.ff->GetParameter(i), fabs(ds.ff->GetParameter(i)) * 0.01);
+				fitter.Config().ParSettings(i+1).Set(ds.ff->GetParName(i), ds.ff->GetParameter(i), fabs(ds.ff->GetParameter(i)) * 0.01);
 		}
 
+		// do fit
 		fitter.FitFCN();
 		fitter.FitFCN();
 
@@ -568,16 +593,21 @@ int main(int argc, const char **argv)
 		const ROOT::Fit::FitResult &result = fitter.Result();
 		for (unsigned int i = 0; i < result.NPar(); ++i)
 		{
-			printf("par %u: %.3E +- %.3E\n", i, result.Parameter(i), sqrt(result.CovMatrix(i, i)));
+			printf("idx %u [%3s]: %+.3E +- %.3E\n", i, result.ParName(i).c_str(), result.Parameter(i), sqrt(result.CovMatrix(i, i)));
 		}
 
+		// result check
+		if (fabs(result.Parameter(0) - 1.) > 5E-4)
+			printf("ERROR: eta is significantly different from 1: eta-1 = %.1E\n", result.Parameter(0)-1.);
+
+		// update fit function with final fit parameters
+		for (int i = 0; i < ds.ff->GetNpar(); ++i)
+			ds.ff->SetParameter(i, result.Parameter(i+1));
 
 		// save fit results
 		gDirectory = d_ds;
 
 		SaveInputPlots(ds, id);
-
-		ds.ff->SetParameters(result.GetParams());
 
 		ds.ff->Write("f_fit");
 
@@ -587,10 +617,13 @@ int main(int argc, const char **argv)
 		double t_bmp, dsdt_bmp;
 		AnalyzeFit(ds, t_dip, dsdt_dip, t_bmp, dsdt_bmp);
 
-		int ndf = id.binData.size() - n_parameters;
+		int data_points = id.binData.size() + 1;
+		int fit_parameters = n_parameters + 1;
+		int ndf = data_points - fit_parameters;
+
 		TGraph *g_data = new TGraph();
 		g_data->SetPoint(0, ds.t_min, ds.t_max);
-		g_data->SetPoint(1, id.binData.size(), ndf);
+		g_data->SetPoint(1, data_points, ndf);
 		g_data->SetPoint(2, result.Chi2(), result.Chi2() / ndf);
 		g_data->SetPoint(3, TMath::Prob(result.Chi2(), ndf), 0.);
 		g_data->SetPoint(4, t_dip, dsdt_dip);
