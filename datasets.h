@@ -1,4 +1,5 @@
 #include "TF1.h"
+#include "TMatrixDSym.h"
 
 #include <vector>
 #include <string>
@@ -17,9 +18,9 @@ struct Dataset
 	double sqrt_s;
 	string name;
 	string f_in;
-	double t_min, t_max;
-	double t_dip, t_bmp;
-	TF1 *ff;
+	double t_min, t_max, t_dip, t_bmp;
+	TMatrixDSym m_t_value_cov;
+	TF1 *ff = NULL;
 	map<unsigned int, ParameterConstraint> constraints;
 
 	void AddConstraint(unsigned int pi, double mean, double sigma)
@@ -83,16 +84,6 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 		if (ds.name == "13TeV")		{ ds.t_min = 0.320; ds.t_dip = 0.470; ds.t_bmp = 0.638; ds.t_max = 0.870; }
 	}
 
-	if (tRangeModel == "minimal-OLD")
-	{
-		if (ds.name == "2.76TeV")	{ ds.t_min = 0.530; ds.t_dip = 0.616; ds.t_bmp = 0.750; ds.t_max = 0.800; }
-		if (ds.name == "7TeV")		{ ds.t_min = 0.442; ds.t_dip = 0.530; ds.t_bmp = 0.694; ds.t_max = 0.780; }
-		if (ds.name == "8TeV")		{ ds.t_min = 0.433; ds.t_dip = 0.518; ds.t_bmp = 0.687; ds.t_max = 0.800; }
-		if (ds.name == "13TeV")		{ ds.t_min = 0.400; ds.t_dip = 0.470; ds.t_bmp = 0.638; ds.t_max = 0.707; }
-
-		if (ds.name == "1.96TeV")	{ ds.t_min = 0.524; ds.t_dip = 0.611; ds.t_bmp = 0.745; ds.t_max = 0.808; }
-	}
-
 	if (tRangeModel == "minimal")
 	{
 		if (ds.name == "2.76TeV")	{ ds.t_min = 0.530; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.850; }
@@ -100,18 +91,16 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 		if (ds.name == "8TeV")		{ ds.t_min = 0.433; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 0.800; }
 		if (ds.name == "13TeV")		{ ds.t_min = 0.400; ds.t_dip = 0.468; ds.t_bmp = 0.638; ds.t_max = 0.719; }
 
-		if (ds.name == "1.96TeV")	{ ds.t_min = 0.548; ds.t_dip = 0.653; ds.t_bmp = 0.819; ds.t_max = 0.875; }
-	}
-
-	if (tRangeModel == "low_t,high_t-OLD")
-	{
-		// TODO: returt t_bmp = 0.750 ??
-		if (ds.name == "2.76TeV")	{ ds.t_min = 0.450; ds.t_dip = 0.616; ds.t_bmp = 0.800; ds.t_max = 0.990; }
-		if (ds.name == "7TeV")		{ ds.t_min = 0.368; ds.t_dip = 0.530; ds.t_bmp = 0.694; ds.t_max = 0.878; }
-		if (ds.name == "8TeV")		{ ds.t_min = 0.375; ds.t_dip = 0.518; ds.t_bmp = 0.687; ds.t_max = 0.900; }
-		if (ds.name == "13TeV")		{ ds.t_min = 0.338; ds.t_dip = 0.470; ds.t_bmp = 0.638; ds.t_max = 0.858; }
-
-		if (ds.name == "1.96TeV")	{ ds.t_min = 0.443; ds.t_dip = 0.611; ds.t_bmp = 0.745; ds.t_max = 0.838; }
+		if (ds.name == "1.96TeV")	{ ds.t_min = 0.548; ds.t_dip = 0.653; ds.t_bmp = 0.819; ds.t_max = 0.875;
+			double cov_data[16] = {
+				2.904E-04, 0., 0., 0.,
+				0., 8.527E-05, 0., 0.,
+				0., 0., 5.252E-04, 0.,
+				0., 0., 0., 9.390E-04
+			};
+			ds.m_t_value_cov.ResizeTo(4, 4);
+			ds.m_t_value_cov.SetMatrixArray(cov_data);
+		}
 	}
 
 	if (tRangeModel == "low_t,high_t")
@@ -121,7 +110,16 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 		if (ds.name == "8TeV")		{ ds.t_min = 0.374; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 0.909; }
 		if (ds.name == "13TeV")		{ ds.t_min = 0.338; ds.t_dip = 0.468; ds.t_bmp = 0.638; ds.t_max = 0.863; }
 
-		if (ds.name == "1.96TeV")	{ ds.t_min = 0.467; ds.t_dip = 0.653; ds.t_bmp = 0.819; ds.t_max = 0.971; }
+		if (ds.name == "1.96TeV")	{ ds.t_min = 0.467; ds.t_dip = 0.653; ds.t_bmp = 0.819; ds.t_max = 0.971;
+			double cov_data[16] = {
+				6.656E-05, 0., 0., 0.,
+				0., 8.527E-05, 0., 0.,
+				0., 0., 5.252E-04, 0.,
+				0., 0., 0., 4.593E-03
+			};
+			ds.m_t_value_cov.ResizeTo(4, 4);
+			ds.m_t_value_cov.SetMatrixArray(cov_data);
+		}
 	}
 }
 
@@ -199,8 +197,8 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		ds.ff->SetParameter(1, pp1);
 		ds.ff->SetParameter(2, pp2);
 
-		for (double t : { 0.40, 0.45, 0.50 })
-			printf("t=%.2f --> f=%.4f\n", t, ds.ff->Eval(t));
+		//for (double t : { 0.40, 0.45, 0.50 })
+		//	printf("t=%.2f --> f=%.4f\n", t, ds.ff->Eval(t));
 
 		return;
 	}
@@ -260,8 +258,8 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		ds.ff->SetParameter(1, pp1);
 		ds.ff->SetParameter(2, pp2);
 
-		for (double t : { 0.40, 0.45, 0.50 })
-			printf("t=%.2f --> f=%.4f\n", t, ds.ff->Eval(t));
+		//for (double t : { 0.40, 0.45, 0.50 })
+		//	printf("t=%.2f --> f=%.4f\n", t, ds.ff->Eval(t));
 
 		return;
 	}
@@ -353,8 +351,8 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		ds.ff->SetParameter(0, pp0);
 		ds.ff->SetParameter(1, pp1);
 
-		for (double t : { 0.40, 0.45, 0.50 })
-			printf("t=%.2f --> f=%.4f\n", t, ds.ff->Eval(t));
+		//for (double t : { 0.40, 0.45, 0.50 })
+		//	printf("t=%.2f --> f=%.4f\n", t, ds.ff->Eval(t));
 
 		return;
 	}
