@@ -22,8 +22,8 @@ AddToLegend("<TOTEM extrapolation:");
 
 draw(RootGetObject(f, base + "/g_dsdt_ext"), "l", red, "central value");
 
-draw(RootGetObject(f, base + "/g_dsdt_ext_pl_unc"), "l", red+dashed, "uncertainty band");
-draw(RootGetObject(f, base + "/g_dsdt_ext_mi_unc"), "l", red+dashed);
+draw(RootGetObject(f, base + "/unc c/g_dsdt_ext_pl_unc"), "l", red+dashed, "uncertainty band");
+draw(RootGetObject(f, base + "/unc c/g_dsdt_ext_mi_unc"), "l", red+dashed);
 
 limits((0.4, 4e-3), (0.9, 4e-1), Crop);
 
@@ -38,7 +38,7 @@ AddToLegend("<TOTEM extrapolation:");
 
 draw(RootGetObject(f, base + "/g_B_ext"), "l", red, "central value");
 
-draw(RootGetObject(f, base + "/g_B_ext_pl_unc"), "l", red+dashed);
-draw(RootGetObject(f, base + "/g_B_ext_mi_unc"), "l", red+dashed);
+draw(RootGetObject(f, base + "/unc c/g_B_ext_pl_unc"), "l", red+dashed);
+draw(RootGetObject(f, base + "/unc c/g_B_ext_mi_unc"), "l", red+dashed);
 
-limits((0.4, -20.), (0.9, +5), Crop);
+limits((0.4, -22.), (0.9, +8), Crop);

@@ -35,7 +35,8 @@ for (int mi : methods.keys)
 		RootObject fit_lin = RootGetObject(f, methods[mi] + "/g_" + quantities[qi] + "_vs_sqrt_s|ff_lin");
 		RootObject fit_log = RootGetObject(f, methods[mi] + "/g_" + quantities[qi] + "_vs_sqrt_s|ff_log");
 
-		draw(graph, "p", black, mCi+2pt+black);
+		draw(graph, "p", blue, mCi+2pt+blue);
+
 		draw(fit_log, "l", red+1pt);
 		draw(fit_lin, "l", red+dashed);
 

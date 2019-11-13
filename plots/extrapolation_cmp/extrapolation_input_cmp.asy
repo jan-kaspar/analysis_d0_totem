@@ -6,7 +6,7 @@ include "../templates/common_code.asy";
 string topDir = "../../";
 
 string results[];
-results.push("minimal/e01+e023:f=0.05/st+sy");
+//results.push("minimal/e01+e023:f=0.05/st+sy");
 results.push("low_t,high_t/e012+e023:f=0.2/st+sy");
 
 string extModel = "sqrt_s";
@@ -36,8 +36,8 @@ for (int ri : results.keys)
 		string f = topDir + "fits/" + results[ri] + "/s_extrapolation.root";
 		string base = extModel + "/" + extFit;
 		draw(RootGetObject(f, base + "/g_dsdt_ext"), "l", black, "central");
-		draw(RootGetObject(f, base + "/g_dsdt_ext_pl_unc"), "l", black+dashed, "uncertainty");
-		draw(RootGetObject(f, base + "/g_dsdt_ext_mi_unc"), "l", black+dashed);
+		draw(RootGetObject(f, base + "/unc c/g_dsdt_ext_pl_unc"), "l", black+dashed, "uncertainty");
+		draw(RootGetObject(f, base + "/unc c/g_dsdt_ext_mi_unc"), "l", black+dashed);
 
 		// draw input
 		AddToLegend("<input for extrapolation:");

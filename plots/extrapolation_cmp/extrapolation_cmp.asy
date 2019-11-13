@@ -7,10 +7,11 @@ string results[];
 pen r_pens[];
 
 //results.push("minimal/e01+e023:f=0.5/st+sy"); r_pens.push(blue+dashed);
-results.push("minimal/e01+e023:f=0.05/st+sy"); r_pens.push(blue);
+//results.push("minimal/e01+e023:f=0.05/st+sy"); r_pens.push(blue);
 
 //results.push("low_t,high_t/e012+e023:f=0.5/st+sy"); r_pens.push(red+dashed);
 results.push("low_t,high_t/e012+e023:f=0.2/st+sy"); r_pens.push(red);
+results.push("low_t,high_t-TEST/e012+e023:f=0.2/st+sy"); r_pens.push(heavygreen);
 
 string extModel = "sqrt_s";
 string extFit = "corr";

@@ -25,6 +25,8 @@ NewRow();
 
 for (int pari = 0; pari < n_parameters; ++pari)
 {
+	write("* parameter ", pari);
+
 	NewRow();
 
 	NewPadLabel(format("parameter %i", pari));

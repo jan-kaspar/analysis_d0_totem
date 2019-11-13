@@ -38,6 +38,9 @@ for (int pari = 0; pari < n_parameters; ++pari)
 			if (find(extModels[emi], "log") >= 0)
 				scale(Log, Linear);
 
+			if (extModels[emi] == "sqrt_s")
+				currentpad.xTicks = LeftTicks(2., 1.);
+
 			string base = extModels[emi] + "/" + extFits[efi] + "/" + format("c_par%i", pari);
 
 			RootObject g_cnt = RootGetObject(f, base + "|g_cnt");
@@ -63,8 +66,10 @@ for (int pari = 0; pari < n_parameters; ++pari)
 				xlimits(1., 14., Crop);
 			*/
 
+			/*
 			if (pari == 4)
 				currentpad.yTicks = RightTicks(10., 2.);
+			*/
 
 			yaxis(XEquals(sqrt_s_ext, false), heavygreen);
 		}
