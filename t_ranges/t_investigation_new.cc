@@ -208,6 +208,18 @@ int main()
 			t_bmp_unc *= 2.;
 			t_max_unc *= 2.;
 
+			/*
+			// print covariance matrix for t-value uncertainty
+			st.PrintCorrelation();
+			const vector<unsigned int> idx_sel = { i_t_min, i_t_dip, i_t_bmp, i_t_max };
+			for (int i : idx_sel)
+			{
+				for (int j : idx_sel)
+					printf("%.3E, ", st.GetCovariance(i, j));
+				printf("\n");
+			}
+			*/
+
 			// manual correction
 			if (ds.name == "2.76TeV")
 			{
@@ -280,10 +292,26 @@ int main()
 		g_t_bmp_vs_sqrt_s->Fit(ff_lin, "Q");
 		g_t_max_vs_sqrt_s->Fit(ff_lin, "Q");
 
-		g_t_min_vs_sqrt_s->Fit(ff_log, "Q+");
-		g_t_dip_vs_sqrt_s->Fit(ff_log, "Q+");
-		g_t_bmp_vs_sqrt_s->Fit(ff_log, "Q+");
-		g_t_max_vs_sqrt_s->Fit(ff_log, "Q+");
+		double t_min_ext, t_min_ext_unc;
+		double t_dip_ext, t_dip_ext_unc;
+		double t_bmp_ext, t_bmp_ext_unc;
+		double t_max_ext, t_max_ext_unc;
+
+		g_t_min_vs_sqrt_s->Fit(ff_log, "Q+"); t_min_ext = ff_log->GetParameter(0); t_min_ext_unc = ff_log->GetParError(0);
+		g_t_dip_vs_sqrt_s->Fit(ff_log, "Q+"); t_dip_ext = ff_log->GetParameter(0); t_dip_ext_unc = ff_log->GetParError(0);
+		g_t_bmp_vs_sqrt_s->Fit(ff_log, "Q+"); t_bmp_ext = ff_log->GetParameter(0); t_bmp_ext_unc = ff_log->GetParError(0);
+		g_t_max_vs_sqrt_s->Fit(ff_log, "Q+"); t_max_ext = ff_log->GetParameter(0); t_max_ext_unc = ff_log->GetParError(0);
+
+		printf("  - extrapolation (%.3f)\n", ds_ext.sqrt_s);
+		printf("    t_min = %.3f +- %.3f\n", t_min_ext, t_min_ext_unc);
+		printf("    t_dip = %.3f +- %.3f\n", t_dip_ext, t_dip_ext_unc);
+		printf("    t_bmp = %.3f +- %.3f\n", t_bmp_ext, t_bmp_ext_unc);
+		printf("    t_max = %.3f +- %.3f\n", t_max_ext, t_max_ext_unc);
+
+		printf("    %.3E, 0., 0., 0.,\n", t_min_ext_unc * t_min_ext_unc);
+		printf("    0., %.3E, 0., 0.,\n", t_dip_ext_unc * t_dip_ext_unc);
+		printf("    0., 0., %.3E, 0.,\n", t_bmp_ext_unc * t_bmp_ext_unc);
+		printf("    0., 0., 0., %.3E\n", t_max_ext_unc * t_max_ext_unc);
 
 		// save plots
 		gDirectory = d_method;
