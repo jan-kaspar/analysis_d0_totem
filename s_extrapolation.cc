@@ -114,11 +114,13 @@ void SaveFitPlots(const ROOT::Fit::FitResult &result, const string &extrapolatio
 	}
 
 	// prepare graph vectors
-	vector<TGraphErrors *> vg_cnt;
+	vector<TGraphErrors *> vg_cnt, vg_cnt_orig;
 	vector<TGraph *> vg_fit, vg_fit_pl_unc, vg_fit_mi_unc;
 	for (int i = 0; i < n_ff_parameters; ++i)
 	{
-		TGraphErrors *ge = new TGraphErrors(); ge->SetName("g_cnt"); vg_cnt.push_back(ge);
+		TGraphErrors *ge;
+		ge = new TGraphErrors(); ge->SetName("g_cnt"); vg_cnt.push_back(ge);
+		ge = new TGraphErrors(); ge->SetName("g_cnt_orig"); vg_cnt_orig.push_back(ge);
 
 		TGraph *g;
 		g = new TGraph(); g->SetName("g_fit"); vg_fit.push_back(g);
@@ -134,6 +136,18 @@ void SaveFitPlots(const ROOT::Fit::FitResult &result, const string &extrapolatio
 			int idx = vg_cnt[i]->GetN();
 			vg_cnt[i]->SetPoint(idx, cnt.sqrt_s, cnt.par(i));
 			vg_cnt[i]->SetPointError(idx, 0., sqrt(cnt.par_V(i, i)));
+		}
+	}
+
+	// make graph of original (dip-bump) fit constraints
+	for (const auto &ds : datasets)
+	{
+		for (const auto &c : ds.constraints)
+		{
+			TGraphErrors *g = vg_cnt_orig[c.first];
+			int idx = g->GetN();
+			g->SetPoint(idx, ds.sqrt_s, c.second.mean);
+			g->SetPointError(idx, 0., c.second.sigma);
 		}
 	}
 
@@ -219,6 +233,7 @@ void SaveFitPlots(const ROOT::Fit::FitResult &result, const string &extrapolatio
 		vg_fit_mi_unc[i]->SetLineStyle(2);
 
 		vg_cnt[i]->Draw("ap");
+		vg_cnt_orig[i]->Draw("p");
 		vg_fit[i]->Draw("l");
 		vg_fit_pl_unc[i]->Draw("l");
 		vg_fit_mi_unc[i]->Draw("l");

@@ -5,8 +5,6 @@ include common_code;
 
 string f = topDir + "s_extrapolation.root";
 
-TGraph_errorBar = None;
-
 //----------------------------------------------------------------------------------------------------
 
 RootObject g_settings = RootGetObject(f, "g_settings");
@@ -43,11 +41,17 @@ for (int pari = 0; pari < n_parameters; ++pari)
 			string base = extModels[emi] + "/" + extFits[efi] + "/" + format("c_par%i", pari);
 
 			RootObject g_cnt = RootGetObject(f, base + "|g_cnt");
+			RootObject g_cnt_orig = RootGetObject(f, base + "|g_cnt_orig");
 			RootObject g_fit = RootGetObject(f, base + "|g_fit");
 			RootObject g_fit_pl_unc = RootGetObject(f, base + "|g_fit_pl_unc");
 			RootObject g_fit_mi_unc = RootGetObject(f, base + "|g_fit_mi_unc");
 
+			TGraph_errorBar = Bars;
+			draw(g_cnt_orig, "p", black, mSq+false+4pt+black);
+
+			TGraph_errorBar = None;
 			draw(g_cnt, "p", blue, mCi+2pt+blue);
+
 			draw(g_fit, "l", red);
 			draw(g_fit_pl_unc, "l", red+dashed);
 			draw(g_fit_mi_unc, "l", red+dashed);
