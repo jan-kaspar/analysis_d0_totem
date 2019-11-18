@@ -364,9 +364,29 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 			ds.t_dip, ds.t_dip, ds.t_dip, ds.t_dip);
 		ds.ff = new TF1("ff", buf);
 
-		ds.ff->SetParameters(-0.816, -8.24, -0.713, -2.535, 0.341);
+		ds.ff->SetParLimits(4, 0., M_PI/2.);
 
-		if (ds.name == "7TeV") ds.ff->SetParameters(0.48, -4.96, 0.51, -3.97, -0.072);
+		if (ds.name == "2.76TeV") ds.ff->SetParameters(0.83, -3.73, 0.84, -3.2, +0.04);
+		if (ds.name == "7TeV") ds.ff->SetParameters(0.479, -5.091, 0.511, -4.09, +0.071);
+		if (ds.name == "8TeV") ds.ff->SetParameters(-0.387, -6.177, -0.316, -3.49, +0.165);
+		if (ds.name == "13TeV") ds.ff->SetParameters(-0.809, -8.191, -0.703, -2.558, 0.334);
+
+		return;
+	}
+
+	if (fitModel == "e01-int-e01-on")
+	{
+		char buf[500];
+		sprintf(buf, "exp(2*[0] + 2*[1]*(x-%.3f)) + exp(2*[0]*[2] + 2*[3]*(x-%.3f)) - 2 *cos([4]) * exp( [0] + [1]*(x-%.3f) + [0]*[2] + [3]*(x-%.3f) )",
+			ds.t_dip, ds.t_dip, ds.t_dip, ds.t_dip);
+		ds.ff = new TF1("ff", buf);
+
+		ds.ff->SetParLimits(4, 0., M_PI/2.);
+
+		if (ds.name == "2.76TeV") ds.ff->SetParameters(0.832, -3.73, 1.007, -3.21, +0.042);
+		if (ds.name == "7TeV") ds.ff->SetParameters(0.479, -5.091, 1.066, -4.09, +0.071);
+		if (ds.name == "8TeV") ds.ff->SetParameters(-0.387, -6.177, 0.825, -3.49, +0.165);
+		if (ds.name == "13TeV") ds.ff->SetParameters(-0.809, -8.191, 0.869, -2.558, 0.334);
 
 		return;
 	}
