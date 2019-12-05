@@ -204,6 +204,8 @@ void SaveFitResults(const ROOT::Fit::FitResult &result)
 
 	TH2D* h2_C = new TH2D("h2_C", "", dim, -0.5, dim-0.5, dim, -0.5, dim-0.5);
 
+	TGraphErrors *g_par = new TGraphErrors();
+
 	for (int i = 0; i < dim; ++i)
 	{
 		p(i) = result.Parameter(i+1);
@@ -214,11 +216,16 @@ void SaveFitResults(const ROOT::Fit::FitResult &result)
 			C(i, j) = result.Correlation(i+1, j+1);
 			h2_C->SetBinContent(i+1, j+1, C(i, j));
 		}
+
+		g_par->SetPoint(i, i, p(i));
+		g_par->SetPointError(i, i, sqrt(V(i, i)));
 	}
 
 	p.Write("par");
 	V.Write("par_V");
 	C.Write("par_C");
+
+	g_par->Write("g_par");
 	h2_C->Write();
 }
 
