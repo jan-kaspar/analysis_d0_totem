@@ -65,6 +65,17 @@ void InitDatasets()
 
 	//--------------------
 
+	/*
+	Dataset d8_b1 = d8; d8_b1.name = "8TeV-b1"; d8_b1.f_in = topDir + "TOTEM_8TeV/data_b1.root"; datasets.push_back(d8_b1);
+	Dataset d8_b2 = d8; d8_b2.name = "8TeV-b2"; d8_b2.f_in = topDir + "TOTEM_8TeV/data_b2.root"; datasets.push_back(d8_b2);
+	Dataset d8_b3 = d8; d8_b3.name = "8TeV-b3"; d8_b3.f_in = topDir + "TOTEM_8TeV/data_b3.root"; datasets.push_back(d8_b3);
+
+	Dataset d8_b1_45b = d8; d8_b1_45b.name = "8TeV-b1-45b"; d8_b1_45b.f_in = topDir + "TOTEM_8TeV/data_b1_45b_56t.root"; datasets.push_back(d8_b1_45b);
+	Dataset d8_b1_45t = d8; d8_b1_45t.name = "8TeV-b1-45t"; d8_b1_45t.f_in = topDir + "TOTEM_8TeV/data_b1_45t_56b.root"; datasets.push_back(d8_b1_45t);
+	*/
+
+	//--------------------
+
 	ds_ext.sqrt_s = 1.96;
 	ds_ext.name = "1.96TeV";
 	ds_ext.f_in = "";
@@ -107,7 +118,7 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 	{
 		if (ds.name == "2.76TeV")	{ ds.t_min = 0.448; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.950; }
 		if (ds.name == "7TeV")		{ ds.t_min = 0.368; ds.t_dip = 0.529; ds.t_bmp = 0.693; ds.t_max = 0.878; }
-		if (ds.name == "8TeV")		{ ds.t_min = 0.374; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 0.909; }
+		if (ds.name.find("8TeV") == 0)		{ ds.t_min = 0.374; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 0.909; }
 		if (ds.name == "13TeV")		{ ds.t_min = 0.338; ds.t_dip = 0.468; ds.t_bmp = 0.638; ds.t_max = 0.863; }
 
 		if (ds.name == "1.96TeV")	{ ds.t_min = 0.467; ds.t_dip = 0.653; ds.t_bmp = 0.819; ds.t_max = 0.971;
@@ -242,7 +253,7 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		// these are the parameters at f=0.5
 		if (ds.name == "2.76TeV") { ds.ff->SetParameters(-3.47, -18.8, -14.9, -4., -26., 40.); ds.AddConstraint(4, -26., 3.); ds.AddConstraint(5, 40., 15.); }
 		if (ds.name == "7TeV") ds.ff->SetParameters(-3.31, -25.3, -6.27, -3.62, -22.6, 39.0);
-		if (ds.name == "8TeV") ds.ff->SetParameters(-3.24, -30.6, -56.7, -3.50, -22.8, 42.0);
+		if (ds.name.find("8TeV") == 0) ds.ff->SetParameters(-3.24, -30.6, -56.7, -3.50, -22.8, 42.0);
 		if (ds.name == "13TeV") ds.ff->SetParameters(-2.70, -33.2, -67.9, -3.03, -20.6, 43.1);
 
 		// do evolution from t1_def to t1
