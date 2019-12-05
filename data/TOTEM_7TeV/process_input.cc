@@ -32,7 +32,7 @@ int main()
 	{
 		double x, x_e, y, y_stat_unc;
 		g->GetPoint(i, x, y);
-		x_e = g->GetErrorX(i);
+		x_e = g->GetErrorX(i) * sqrt(12.)/2.;
 		y_stat_unc = g->GetErrorY(i);
 
 		if (x < 0.377)
