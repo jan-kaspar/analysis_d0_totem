@@ -9,14 +9,14 @@ using namespace std;
 
 //----------------------------------------------------------------------------------------------------
 
-int main()
+void ProcessOne(const string &input, const string &output)
 {
 	// get input
-	TFile *f_in = TFile::Open("/eos/user/j/jkaspar/work/analyses/elastic/4000GeV/beta90/high_t/DS-merged/merged.root");
-	TH1D *h_in = (TH1D *) f_in->Get("ob-1-30-0.10/DS4-sc/combined/h_dsdt");
+	TFile *f_in = TFile::Open("/afs/cern.ch/work/j/jkaspar/work/analyses/elastic/4000GeV/beta90/high_t/DS-merged/merged.root");
+	TH1D *h_in = (TH1D *) f_in->Get(input.c_str());
 
 	// prepare output
-	TFile *f_out = TFile::Open("data.root", "recreate");
+	TFile *f_out = TFile::Open(output.c_str(), "recreate");
 
 	TGraphErrors *g_dsdt = new TGraphErrors();
 
@@ -40,8 +40,8 @@ int main()
 	// make fit
 	TF1 *ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x + [3]*x*x*x) + exp([4] + [5]*x + [6]*x*x + [7]*x*x*x)");
 	ff->SetParameters(
-		10.5, -37.7, 15.8, 0.,
-		-33.9, 113., -139., 54.7
+		3.85, -2.58, -29.8, 0.,
+		-25.6, 80.5, -93.8, 34.6
 	);
 	ff->FixParameter(3, 0.);
 	ff->SetRange(0.25, 1.1);
@@ -100,6 +100,20 @@ int main()
 	delete f_in;
 
 	delete f_out;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+int main()
+{
+	ProcessOne("ob-1-30-0.10/DS4-sc/combined/h_dsdt", "data.root");
+
+	ProcessOne("ob-1-30-0.10/DS4-sc/combined/h_dsdt", "data_b1.root");
+	ProcessOne("ob-2-20-0.20/DS4-sc/combined/h_dsdt", "data_b2.root");
+	ProcessOne("ob-3-10-0.30/DS4-sc/combined/h_dsdt", "data_b3.root");
+
+	ProcessOne("ob-1-30-0.10/DS4-sc/45b_56t/h_dsdt", "data_b1_45b_56t.root");
+	ProcessOne("ob-1-30-0.10/DS4-sc/45t_56b/h_dsdt", "data_b1_45t_56b.root");
 
 	return 0;
 }
