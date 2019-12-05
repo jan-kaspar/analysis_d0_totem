@@ -231,12 +231,12 @@ void SaveFitResults(const ROOT::Fit::FitResult &result)
 
 //----------------------------------------------------------------------------------------------------
 
-void AnalyzeFit(const Dataset &ds, double &t_dip, double &dsdt_dip, double &t_bmp, double &dsdt_bmp)
+void AnalyzeFit(const TF1 *ff, const Dataset &ds, double &t_dip, double &dsdt_dip, double &t_bmp, double &dsdt_bmp)
 {
 	dsdt_dip = 1E100;
 	for (double t = (ds.t_min + ds.t_dip)/2.; t < (ds.t_dip + ds.t_bmp)/2.; t += 0.001)
 	{
-		const double dsdt = ds.ff->Eval(t);
+		const double dsdt = ff->Eval(t);
 		if (dsdt < dsdt_dip)
 		{
 			dsdt_dip = dsdt;
@@ -247,7 +247,7 @@ void AnalyzeFit(const Dataset &ds, double &t_dip, double &dsdt_dip, double &t_bm
 	dsdt_bmp = -1E100;
 	for (double t = (ds.t_dip + ds.t_bmp)/2.; t < (ds.t_bmp + ds.t_max)/2.; t += 0.001)
 	{
-		const double dsdt = ds.ff->Eval(t);
+		const double dsdt = ff->Eval(t);
 		if (dsdt > dsdt_bmp)
 		{
 			dsdt_bmp = dsdt;
@@ -260,7 +260,10 @@ void AnalyzeFit(const Dataset &ds, double &t_dip, double &dsdt_dip, double &t_bm
 
 const unsigned int n_points = 200;
 
-void BuildUncertaintyBand(const Dataset &ds, const ROOT::Fit::FitResult &result)
+void BuildUncertaintyBand(const Dataset &ds, const ROOT::Fit::FitResult &result,
+		double &t_dip, double &t_dip_unc, double &dsdt_dip, double &dsdt_dip_unc,
+		double &t_bmp, double &t_bmp_unc, double &dsdt_bmp, double &dsdt_bmp_unc,
+		double &R, double &R_unc)
 {
 	// prepare pertubation generator matrix
 	int dim = result.NPar();
@@ -276,6 +279,13 @@ void BuildUncertaintyBand(const Dataset &ds, const ROOT::Fit::FitResult &result)
 		S(i, i) = (eig_values(i) >= 0.) ? sqrt(eig_values(i)) : 0.;
 	TMatrixD m_gen = eig_decomp.GetEigenVectors() * S;
 
+	// get central values
+	const double dsdt_at_t_min = ds.ff->Eval(ds.t_min);
+	const double dsdt_at_t_max = ds.ff->Eval(ds.t_max);
+
+	AnalyzeFit(ds.ff, ds, t_dip, dsdt_dip, t_bmp, dsdt_bmp);
+	R = dsdt_bmp / dsdt_dip;
+
 	// uncertainty band
 	const unsigned int n_repetitions = 1000;
 	vector<Stat> stat(n_points, Stat(1));
@@ -283,8 +293,7 @@ void BuildUncertaintyBand(const Dataset &ds, const ROOT::Fit::FitResult &result)
 	TH1D *h_dsdt_mod_pf = new TH1D("h_dsdt_mod_pf", "", 100, 0., 0.);
 	TH1D *h_dsdt_mod_pl = new TH1D("h_dsdt_mod_pl", "", 100, 0., 0.);
 
-	const double dsdt_at_t_min = ds.ff->Eval(ds.t_min);
-	const double dsdt_at_t_max = ds.ff->Eval(ds.t_max);
+	Stat s_t_dip(1), s_dsdt_dip(1), s_t_bmp(1), s_dsdt_bmp(1), s_R(1);
 
 	for (unsigned int ir = 0; ir < n_repetitions; ++ir)
 	{
@@ -296,7 +305,7 @@ void BuildUncertaintyBand(const Dataset &ds, const ROOT::Fit::FitResult &result)
 
 		TF1 *ff_mod = new TF1(*ds.ff);
 
-		const double eta = 1.; // want to check effect of uncertainty of the fit function only
+		const double eta = 1.; // want to check the effect of uncertainty of the fit function only
 
 		for (int i = 0; i < ff_mod->GetNpar(); i++)
 			ff_mod->SetParameter(i, ff_mod->GetParameter(i) + delta(i+1));
@@ -324,12 +333,29 @@ void BuildUncertaintyBand(const Dataset &ds, const ROOT::Fit::FitResult &result)
 			if (i == n_points - 1) h_dsdt_mod_pl->Fill(f_dsdt);
 		}
 
+		// analyze biased fit
+		double t_dip_mod, dsdt_dip_mod, t_bmp_mod, dsdt_bmp_mod;
+		AnalyzeFit(ff_mod, ds, t_dip_mod, dsdt_dip_mod, t_bmp_mod, dsdt_bmp_mod);
+
+		s_t_dip.Fill(t_dip_mod);
+		s_dsdt_dip.Fill(dsdt_dip_mod);
+		s_t_bmp.Fill(t_bmp_mod);
+		s_dsdt_bmp.Fill(dsdt_bmp_mod);
+		s_R.Fill(dsdt_bmp_mod / dsdt_dip_mod);
+
 		// clean up
 		delete ff_mod;
 	}
 
 	h_dsdt_mod_pf->Write();
 	h_dsdt_mod_pl->Write();
+
+	// store results
+	t_dip_unc = s_t_dip.GetStdDev(0);
+	dsdt_dip_unc = s_dsdt_dip.GetStdDev(0);
+	t_bmp_unc = s_t_bmp.GetStdDev(0);
+	dsdt_bmp_unc = s_dsdt_bmp.GetStdDev(0);
+	R_unc = s_R.GetStdDev(0);
 
 	// build graphs
 	TGraph *g_fit = new TGraph();
@@ -634,9 +660,16 @@ int main(int argc, const char **argv)
 
 		SaveFitResults(result);
 
-		double t_dip, dsdt_dip;
-		double t_bmp, dsdt_bmp;
-		AnalyzeFit(ds, t_dip, dsdt_dip, t_bmp, dsdt_bmp);
+		double t_dip, t_dip_unc;
+		double dsdt_dip, dsdt_dip_unc;
+		double t_bmp, t_bmp_unc;
+		double dsdt_bmp, dsdt_bmp_unc;
+		double R, R_unc;
+		BuildUncertaintyBand(ds, result, t_dip, t_dip_unc, dsdt_dip, dsdt_dip_unc, t_bmp, t_bmp_unc, dsdt_bmp, dsdt_bmp_unc, R, R_unc);
+
+		BuildSensitivtyPlot(ds);
+
+		BuildComponentPlots(ds, fitModel);
 
 		int data_points = id.binData.size() + 1;
 		int fit_parameters = n_ff_parameters + 1;
@@ -647,15 +680,12 @@ int main(int argc, const char **argv)
 		g_data->SetPoint(1, data_points, ndf);
 		g_data->SetPoint(2, result.Chi2(), result.Chi2() / ndf);
 		g_data->SetPoint(3, TMath::Prob(result.Chi2(), ndf), 0.);
-		g_data->SetPoint(4, t_dip, dsdt_dip);
-		g_data->SetPoint(5, t_bmp, dsdt_bmp);
+		g_data->SetPoint(4, t_dip, t_dip_unc);
+		g_data->SetPoint(5, dsdt_dip, dsdt_dip_unc);
+		g_data->SetPoint(6, t_bmp, t_bmp_unc);
+		g_data->SetPoint(7, dsdt_bmp, dsdt_bmp_unc);
+		g_data->SetPoint(8, R, R_unc);
 		g_data->Write("g_data");
-
-		BuildUncertaintyBand(ds, result);
-
-		BuildSensitivtyPlot(ds);
-
-		BuildComponentPlots(ds, fitModel);
 	}
 
 	// clean up

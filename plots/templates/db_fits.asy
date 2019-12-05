@@ -87,10 +87,11 @@ for (int dsi : datasets.keys)
 	g_data.vExec("GetPoint", 1, ax, ay); real n_fit_points = ax[0], ndf = ay[0];
 	g_data.vExec("GetPoint", 2, ax, ay); real chi2 = ax[0], chi2_ndf = ay[0];
 	g_data.vExec("GetPoint", 3, ax, ay); real p_value = ax[0];
-	g_data.vExec("GetPoint", 4, ax, ay); real t_dip = ax[0], dsdt_dip = ay[0];
-	g_data.vExec("GetPoint", 5, ax, ay); real t_bmp = ax[0], dsdt_bmp = ay[0];
-
-	real R = dsdt_bmp / dsdt_dip;
+	g_data.vExec("GetPoint", 4, ax, ay); real t_dip = ax[0], t_dip_unc = ay[0];
+	g_data.vExec("GetPoint", 5, ax, ay); real dsdt_dip = ax[0], dsdt_dip_unc = ay[0];
+	g_data.vExec("GetPoint", 6, ax, ay); real t_bmp = ax[0], t_bmp_unc = ay[0];
+	g_data.vExec("GetPoint", 7, ax, ay); real dsdt_bmp = ax[0], dsdt_bmp_unc = ay[0];
+	g_data.vExec("GetPoint", 8, ax, ay); real R = ax[0], R_unc = ay[0];
 
 	NewPad("$|t|\ung{GeV^2}$", "$\d\si/\d t\ung{mb/GeV^2}$");
 	scale(Linear, Log);
@@ -107,13 +108,14 @@ for (int dsi : datasets.keys)
 
 	draw(g_dsdt, "p", blue, mCi+0.5pt);
 
-	limits((0.3, 4e-3), (0.9, 4e-1), Crop);
+	limits((0.3, 4e-3), (0.9, 5e-1), Crop);
 
 	AddToLegend("<$\ch^2/\hbox{ndf} = " + format("%#.1f / (", chi2) + format("%.0f", n_fit_points) + format(" - %.0f)", n_fit_points - ndf) + format(" = %#.1f$", chi2_ndf));
-	AddToLegend(format("<$\hbox{p-value} = %#.1E$", p_value));
-	AddToLegend(format("<$R = %#.2f$", R));
+	AddToLegend(format("<$\hbox{p-value} = %#.1f\un{\%}$", p_value * 100.));
+	AddToLegend(format("<$R = %#.2f", R) + format("\pm %#.2f$", R_unc));
+	AddToLegend(format("<$t_{\rm dip} = (%#.3f", t_dip) + format("\pm %#.3f)\un{GeV^2}$", t_dip_unc));
 
-	AttachLegend();
+	AttachLegend(BuildLegend(vSkip=-1mm));
 }
 
 
