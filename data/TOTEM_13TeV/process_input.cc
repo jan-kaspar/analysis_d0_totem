@@ -43,6 +43,13 @@ int main()
 		{
 			const double t_unc = (t_max - t_min) / 2.;
 
+			// to account for the visible oscillations at low |t|
+			if (t_repr < 0.43)
+			{
+				const double ac = dsdt * 0.01;
+				dsdt_syst_unc_t_dep = sqrt(dsdt_syst_unc_t_dep*dsdt_syst_unc_t_dep + ac*ac);
+			}
+
 			int idx = g_dsdt->GetN();
 			g_dsdt->SetPoint(idx, t_repr, dsdt);
 			g_dsdt->SetPointError(idx, t_unc, dsdt_stat_unc);
