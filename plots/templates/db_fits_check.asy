@@ -71,11 +71,11 @@ NewRow();
 
 for (int dsi : datasets.keys)
 {
-	RootObject g_data = RootGetObject(f, datasets[dsi] + "/g_data");
+	RootObject g_data = RootGetObject(f, datasets[dsi] + "/check/g_data");
 
-	RootObject g_dsdt = RootGetObject(f, datasets[dsi] + "/g_dsdt");
-	RootObject g_dsdt_syst_t_dep = RootGetObject(f, datasets[dsi] + "/g_dsdt_unc_syst_t_dep");
-	RootObject g_dsdt_syst_full = RootGetObject(f, datasets[dsi] + "/g_dsdt_unc_syst_full");
+	RootObject g_dsdt = RootGetObject(f, datasets[dsi] + "/check/g_dsdt");
+	RootObject g_dsdt_syst_t_dep = RootGetObject(f, datasets[dsi] + "/check/g_dsdt_unc_syst_t_dep");
+	RootObject g_dsdt_syst_full = RootGetObject(f, datasets[dsi] + "/check/g_dsdt_unc_syst_full");
 
 	RootObject g_fit = RootGetObject(f, datasets[dsi] + "/g_fit");
 	RootObject g_fit_pl_unc = RootGetObject(f, datasets[dsi] + "/g_fit_pl_unc");
@@ -124,11 +124,11 @@ NewRow();
 
 for (int dsi : datasets.keys)
 {
-	RootObject g_data = RootGetObject(f, datasets[dsi] + "/g_data");
+	RootObject g_data = RootGetObject(f, datasets[dsi] + "/check/g_data");
 
-	RootObject g_dsdt = RootGetObject(f, datasets[dsi] + "/g_dsdt");
-	RootObject g_dsdt_syst_t_dep = RootGetObject(f, datasets[dsi] + "/g_dsdt_unc_syst_t_dep");
-	RootObject g_dsdt_syst_full = RootGetObject(f, datasets[dsi] + "/g_dsdt_unc_syst_full");
+	RootObject g_dsdt = RootGetObject(f, datasets[dsi] + "/check/g_dsdt");
+	RootObject g_dsdt_syst_t_dep = RootGetObject(f, datasets[dsi] + "/check/g_dsdt_unc_syst_t_dep");
+	RootObject g_dsdt_syst_full = RootGetObject(f, datasets[dsi] + "/check/g_dsdt_unc_syst_full");
 
 	RootObject g_fit = RootGetObject(f, datasets[dsi] + "/g_fit");
 	RootObject g_fit_pl_unc = RootGetObject(f, datasets[dsi] + "/g_fit_pl_unc");
