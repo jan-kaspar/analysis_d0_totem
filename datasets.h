@@ -18,6 +18,7 @@ struct Dataset
 	double sqrt_s;
 	string name;
 	string f_in;
+	string f_in_check;
 	double t_min, t_max, t_dip, t_bmp;
 	TMatrixDSym m_t_value_cov;
 	TF1 *ff = NULL;
@@ -43,35 +44,49 @@ void InitDatasets()
 	d2.sqrt_s = 2.76;
 	d2.name = "2.76TeV";
 	d2.f_in = topDir + "TOTEM_2.76TeV/data.root";
+	d2.f_in_check = topDir + "TOTEM_2.76TeV/data.root";
 	datasets.push_back(d2);
 
 	Dataset d7;
 	d7.sqrt_s = 7.;
 	d7.name = "7TeV";
-	d7.f_in = topDir + "TOTEM_7TeV/data.root";
+	d7.f_in = topDir + "TOTEM_7TeV/data_att.root";
+	d7.f_in_check = topDir + "TOTEM_7TeV/data.root";
 	datasets.push_back(d7);
 
 	Dataset d8;
 	d8.sqrt_s = 8.;
 	d8.name = "8TeV";
-	d8.f_in = topDir + "TOTEM_8TeV/data.root";
+	d8.f_in = topDir + "TOTEM_8TeV/data_bt1.root";
+	d8.f_in_check = topDir + "TOTEM_8TeV/data_bt1.root";
 	datasets.push_back(d8);
 
 	Dataset d13;
 	d13.sqrt_s = 13.;
 	d13.name = "13TeV";
-	d13.f_in = topDir + "TOTEM_13TeV/data.root";
+	d13.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8_att.root";
+	d13.f_in_check = topDir + "TOTEM_13TeV/data_addUnc0.8.root";
 	datasets.push_back(d13);
 
 	//--------------------
 
-	/*
-	Dataset d8_b1 = d8; d8_b1.name = "8TeV-b1"; d8_b1.f_in = topDir + "TOTEM_8TeV/data_b1.root"; datasets.push_back(d8_b1);
-	Dataset d8_b2 = d8; d8_b2.name = "8TeV-b2"; d8_b2.f_in = topDir + "TOTEM_8TeV/data_b2.root"; datasets.push_back(d8_b2);
-	Dataset d8_b3 = d8; d8_b3.name = "8TeV-b3"; d8_b3.f_in = topDir + "TOTEM_8TeV/data_b3.root"; datasets.push_back(d8_b3);
+	//Dataset d8_b1 = d8; d8_b1.name = "8TeV-b1"; d8_b1.f_in = topDir + "TOTEM_8TeV/data_b1.root"; datasets.push_back(d8_b1);
+	//Dataset d8_b2 = d8; d8_b2.name = "8TeV-b2"; d8_b2.f_in = topDir + "TOTEM_8TeV/data_b2.root"; datasets.push_back(d8_b2);
+	//Dataset d8_b3 = d8; d8_b3.name = "8TeV-b3"; d8_b3.f_in = topDir + "TOTEM_8TeV/data_b3.root"; datasets.push_back(d8_b3);
 
+	/*
 	Dataset d8_b1_45b = d8; d8_b1_45b.name = "8TeV-b1-45b"; d8_b1_45b.f_in = topDir + "TOTEM_8TeV/data_b1_45b_56t.root"; datasets.push_back(d8_b1_45b);
 	Dataset d8_b1_45t = d8; d8_b1_45t.name = "8TeV-b1-45t"; d8_b1_45t.f_in = topDir + "TOTEM_8TeV/data_b1_45t_56b.root"; datasets.push_back(d8_b1_45t);
+
+	Dataset d8_bt1 = d8; d8_bt1.name = "8TeV-bt1"; d8_bt1.f_in = topDir + "TOTEM_8TeV/data_bt1.root"; datasets.push_back(d8_bt1);
+	*/
+
+	/*
+	{ Dataset d = d13; d.name = "13TeV-addUnc0.5"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc0.5.root"; datasets.push_back(d); }
+	{ Dataset d = d13; d.name = "13TeV-addUnc0.8"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8.root"; datasets.push_back(d); }
+	{ Dataset d = d13; d.name = "13TeV-addUnc0.8-att"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8_att.root"; datasets.push_back(d); }
+	{ Dataset d = d13; d.name = "13TeV-addUnc1.0"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc1.0.root"; datasets.push_back(d); }
+	{ Dataset d = d13; d.name = "13TeV-addUnc1.5"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc1.5.root"; datasets.push_back(d); }
 	*/
 
 	//--------------------
@@ -97,12 +112,12 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 
 	if (tRangeModel == "minimal")
 	{
-		if (ds.name == "2.76TeV")	{ ds.t_min = 0.530; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.850; }
-		if (ds.name == "7TeV")		{ ds.t_min = 0.442; ds.t_dip = 0.529; ds.t_bmp = 0.693; ds.t_max = 0.780; }
-		if (ds.name == "8TeV")		{ ds.t_min = 0.433; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 0.800; }
-		if (ds.name == "13TeV")		{ ds.t_min = 0.400; ds.t_dip = 0.468; ds.t_bmp = 0.638; ds.t_max = 0.719; }
+		if (ds.name.find("2.76TeV") == 0)	{ ds.t_min = 0.530; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.850; }
+		if (ds.name.find("7TeV") == 0)		{ ds.t_min = 0.442; ds.t_dip = 0.529; ds.t_bmp = 0.693; ds.t_max = 0.780; }
+		if (ds.name.find("8TeV") == 0)		{ ds.t_min = 0.433; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 0.800; }
+		if (ds.name.find("13TeV") == 0)		{ ds.t_min = 0.400; ds.t_dip = 0.468; ds.t_bmp = 0.638; ds.t_max = 0.719; }
 
-		if (ds.name == "1.96TeV")	{ ds.t_min = 0.548; ds.t_dip = 0.653; ds.t_bmp = 0.819; ds.t_max = 0.875;
+		if (ds.name == "1.96TeV")			{ ds.t_min = 0.548; ds.t_dip = 0.653; ds.t_bmp = 0.819; ds.t_max = 0.875;
 			double cov_data[16] = {
 				2.904E-04, 0., 0., 0.,
 				0., 8.527E-05, 0., 0.,
@@ -116,17 +131,17 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 
 	if (tRangeModel == "low_t,high_t")
 	{
-		if (ds.name == "2.76TeV")	{ ds.t_min = 0.448; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.950; }
-		if (ds.name == "7TeV")		{ ds.t_min = 0.368; ds.t_dip = 0.529; ds.t_bmp = 0.693; ds.t_max = 0.878; }
-		if (ds.name.find("8TeV") == 0)		{ ds.t_min = 0.374; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 0.909; }
-		if (ds.name == "13TeV")		{ ds.t_min = 0.338; ds.t_dip = 0.468; ds.t_bmp = 0.638; ds.t_max = 0.863; }
+		if (ds.name.find("2.76TeV") == 0)	{ ds.t_min = 0.448; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.950; }
+		if (ds.name.find("7TeV") == 0)		{ ds.t_min = 0.368; ds.t_dip = 0.529; ds.t_bmp = 0.693; ds.t_max = 0.885; }
+		if (ds.name.find("8TeV") == 0)		{ ds.t_min = 0.373; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 0.915; }
+		if (ds.name.find("13TeV") == 0)		{ ds.t_min = 0.338; ds.t_dip = 0.468; ds.t_bmp = 0.639; ds.t_max = 0.863; }
 
-		if (ds.name == "1.96TeV")	{ ds.t_min = 0.467; ds.t_dip = 0.653; ds.t_bmp = 0.819; ds.t_max = 0.971;
+		if (ds.name == "1.96TeV")			{ ds.t_min = 0.466; ds.t_dip = 0.656; ds.t_bmp = 0.836; ds.t_max = 1.003;
 			double cov_data[16] = {
-				6.656E-05, 0., 0., 0.,
-				0., 8.527E-05, 0., 0.,
-				0., 0., 5.252E-04, 0.,
-				0., 0., 0., 4.593E-03
+				5.906E-05, 0., 0., 0.,
+				0., 7.382E-05, 0., 0.,
+				0., 0., 4.425E-04, 0.,
+				0., 0., 0., 4.264E-03
 			};
 			ds.m_t_value_cov.ResizeTo(4, 4);
 			ds.m_t_value_cov.SetMatrixArray(cov_data);
@@ -139,6 +154,8 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 void BuildFitFunction(const string fitModel, Dataset &ds)
 {
 	printf("\n>> BuildFitFunction(%s, %s)\n", fitModel.c_str(), ds.name.c_str());
+
+	ds.ff = NULL;
 
 	if (fitModel == "bootstrap")
 	{
@@ -251,10 +268,10 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		ds.ff = new TF1("ff", buf);
 
 		// these are the parameters at f=0.5
-		if (ds.name == "2.76TeV") { ds.ff->SetParameters(-3.47, -18.8, -14.9, -4., -26., 40.); ds.AddConstraint(4, -26., 3.); ds.AddConstraint(5, 40., 15.); }
-		if (ds.name == "7TeV") ds.ff->SetParameters(-3.31, -25.3, -6.27, -3.62, -22.6, 39.0);
+		if (ds.name.find("2.76TeV") == 0) { ds.ff->SetParameters(-3.47, -18.8, -14.9, -4., -26., 40.); ds.AddConstraint(4, -26., 3.); ds.AddConstraint(5, 40., 15.); }
+		if (ds.name.find("7TeV") == 0) ds.ff->SetParameters(-3.31, -25.3, -6.27, -3.62, -22.6, 39.0);
 		if (ds.name.find("8TeV") == 0) ds.ff->SetParameters(-3.24, -30.6, -56.7, -3.50, -22.8, 42.0);
-		if (ds.name == "13TeV") ds.ff->SetParameters(-2.70, -33.2, -67.9, -3.03, -20.6, 43.1);
+		if (ds.name.find("13TeV") == 0) ds.ff->SetParameters(-2.70, -33.2, -67.9, -3.03, -20.6, 43.1);
 
 		// do evolution from t1_def to t1
 		const double p0 = ds.ff->GetParameter(0);
