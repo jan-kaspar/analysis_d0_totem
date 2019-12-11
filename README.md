@@ -12,12 +12,13 @@ The sources are in `data/TOTEM_<energy>` directories. They contain the original 
 
 # II. Definition of t-ranges
 
-The relevant code is in `t_ranges` sub-directory. Run
-```
-make && ./t_investigation
-```
-to apply the rules defined in `t_investigation.cc`.
+Edit `run_multiple` such that the model "bootstrap/bootstrap" is enabled.
 
+Then go to the `t_ranges` sub-directory and run
+```
+make && ./t_investigation_new
+```
+The output can then be used to update `datasets.h`.
 
 
 # III. Fits and extrapolation
