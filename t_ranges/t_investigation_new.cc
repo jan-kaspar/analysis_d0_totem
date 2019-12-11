@@ -118,7 +118,7 @@ int main()
 		BuildTRanges("bootstrap", ds);
 
 	// prepare input
-	TFile *f_in = TFile::Open("../fits/bootstrap/bootstrap/st+sy/do_fits.root");
+	TFile *f_in = TFile::Open("../fits/bootstrap/bootstrap/st+sy+no/do_fits.root");
 
 	// prepare output
 	TFile *f_out = TFile::Open("t_investigation_new.root", "recreate");
@@ -145,6 +145,7 @@ int main()
 			//printf("    dataset: %.3f, %.3f\n", ds.t_dip, ds.t_bmp);
 
 			// get input
+			TGraphErrors *g_dsdt = (TGraphErrors *) f_in->Get((ds.name + "/g_dsdt").c_str());
 			TF1 *ff = (TF1 *) f_in->Get((ds.name + "/f_fit").c_str());
 			TMatrixDSym *par_cov = (TMatrixDSym *) f_in->Get((ds.name + "/par_V").c_str());
 			TGraph *g_fit = (TGraph *) f_in->Get((ds.name + "/g_fit").c_str());
@@ -246,6 +247,8 @@ int main()
 
 			// save results
 			gDirectory = d_method->mkdir(ds.name.c_str());
+
+			g_dsdt->Write("g_dsdt");
 
 			TGraph *g_data = new TGraph();
 			g_data->SetPoint(0, t_min, t_min_unc);
