@@ -6,7 +6,7 @@ include "../templates/common_code.asy";
 string top_dir = "../../";
 
 string methods[];
-methods.push("minimal");
+//methods.push("minimal");
 //methods.push("low_t");
 //methods.push("high_t");
 methods.push("low_t,high_t");
@@ -31,11 +31,8 @@ for (int mi : methods.keys)
 
 	for (int dsi : datasets.keys)
 	{
-
-		string f = top_dir + "data/TOTEM_" + datasets[dsi] + "/data.root";
-		RootObject g_dsdt = RootGetObject(f, "g_dsdt");
-
 		string f = top_dir + "t_ranges/t_investigation_new.root";
+		RootObject g_dsdt = RootGetObject(f, methods[mi] + "/" + datasets[dsi] + "/g_dsdt");
 		RootObject g_fit = RootGetObject(f, methods[mi] + "/" + datasets[dsi] + "/g_fit");
 		RootObject g_data = RootGetObject(f, methods[mi] + "/" + datasets[dsi] + "/g_data");
 

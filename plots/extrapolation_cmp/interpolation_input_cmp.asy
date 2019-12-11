@@ -6,8 +6,8 @@ include "../templates/common_code.asy";
 string topDir = "../../";
 
 string results[];
-results.push("minimal/e01+e023:f=0.05/st+sy");
-results.push("low_t,high_t/e012+e023:f=0.2/st+sy");
+//results.push("minimal/e01+e023:f=0.05/st+sy");
+results.push("low_t,high_t/e012+e023:f=0.2/st+sy+no");
 
 string extModel = "sqrt_s";
 string extFit = "corr";

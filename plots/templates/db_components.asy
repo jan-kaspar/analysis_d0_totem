@@ -46,7 +46,7 @@ for (int dsi : datasets.keys)
 	draw(g_fit_c1, "l", blue);
 	draw(g_fit_c2, "l", heavygreen);
 
-	limits((0.3, 4e-3), (0.9, 4e-1), Crop);
+	limits((0.3, 4e-3), (0.9, 4e1), Crop);
 
 	//AttachLegend();
 }
