@@ -46,9 +46,9 @@ bool useStatUnc = true;
 bool useSystUnc = true;
 bool useNormUnc = false;
 
-void LoadInput(const Dataset &ds, InputData &id)
+void LoadInput(const Dataset &ds, InputData &id, bool useCheckFile = false)
 {
-	TFile *f_in = TFile::Open(ds.f_in.c_str());
+	TFile *f_in = TFile::Open((useCheckFile) ? ds.f_in_check.c_str() : ds.f_in.c_str());
 
 	// get input
 	TGraph *g_dsdt = (TGraph *) f_in->Get("g_dsdt");
@@ -680,6 +680,33 @@ int main(int argc, const char **argv)
 		g_data->SetPoint(1, data_points, ndf);
 		g_data->SetPoint(2, result.Chi2(), result.Chi2() / ndf);
 		g_data->SetPoint(3, TMath::Prob(result.Chi2(), ndf), 0.);
+		g_data->SetPoint(4, t_dip, t_dip_unc);
+		g_data->SetPoint(5, dsdt_dip, dsdt_dip_unc);
+		g_data->SetPoint(6, t_bmp, t_bmp_unc);
+		g_data->SetPoint(7, dsdt_bmp, dsdt_bmp_unc);
+		g_data->SetPoint(8, R, R_unc);
+		g_data->Write("g_data");
+
+		// test with another "check" dataset
+		InputData id_check;
+		LoadInput(ds, id_check, true);
+		s2Fcn.id = &id_check;
+
+		double fpar[ds.ff->GetNpar() + 1];
+		for (int i = 0; i < ds.ff->GetNpar() + 1; ++i)
+			fpar[i] = result.Parameter(i);
+
+		double chi2_check = s2Fcn(fpar);
+
+		gDirectory = d_ds->mkdir("check");
+
+		SaveInputPlots(ds, id_check);
+
+		g_data = new TGraph();
+		g_data->SetPoint(0, ds.t_min, ds.t_max);
+		g_data->SetPoint(1, data_points, ndf);
+		g_data->SetPoint(2, chi2_check, chi2_check / ndf);
+		g_data->SetPoint(3, TMath::Prob(chi2_check, ndf), 0.);
 		g_data->SetPoint(4, t_dip, t_dip_unc);
 		g_data->SetPoint(5, dsdt_dip, dsdt_dip_unc);
 		g_data->SetPoint(6, t_bmp, t_bmp_unc);
