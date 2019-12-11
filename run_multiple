@@ -4,8 +4,6 @@
 
 # t_ranges
 #	"minimal"
-#	"low_t"
-#	"high_t"
 #	"low_t/high_t"
 
 models_ranges=(
@@ -14,7 +12,7 @@ models_ranges=(
 	#"minimal/e012+e02"
 	##"minimal/e01+e02"
 	#"minimal/e01+e023"
-	"minimal/e01+e023:f=0.05"
+	#"minimal/e01+e023:f=0.05" # default
 
 	#"minimal/e01+e023:f=0.0"
 	#"minimal/e01+e023:f=0.05"
@@ -32,7 +30,7 @@ models_ranges=(
 
 	##"low_t,high_t/e012+e0123"
 	#"low_t,high_t/e012+e023"
-	"low_t,high_t/e012+e023:f=0.2"
+	"low_t,high_t/e012+e023:f=0.2" # default
 
 	#"low_t,high_t/e012+e023:f=0.0"
 	#"low_t,high_t/e012+e023:f=0.05"
@@ -47,12 +45,19 @@ models_ranges=(
 	#"low_t,high_t/e012+e023:f=0.8"
 	#"low_t,high_t/e012+e023:f=0.9"
 	#"low_t,high_t/e012+e023:f=1.0"
+
+	#"low_t,high_t/e01-int-e01"
+	#"low_t,high_t/e01-int-e01-on"
 )
+
+#models_ranges=(
+#	"bootstrap/bootstrap"
+#)
 
 uncs=(
 	#"st"
-	"st+sy"
-	#"st+sy+no"
+	#"st+sy"
+	"st+sy+no"
 )
 
 #----------------------------------------------------------------------------------------------------
