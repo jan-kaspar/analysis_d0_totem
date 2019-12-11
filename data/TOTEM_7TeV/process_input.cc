@@ -10,12 +10,12 @@ using namespace std;
 
 //----------------------------------------------------------------------------------------------------
 
-int main()
+void ProcessOne(const string &outputFile, bool attract)
 {
 	// get input data
 	TFile *f_in = new TFile("publication1_graph.root");
 	TGraphErrors *g = (TGraphErrors *) f_in->Get("g1");
-	
+
 	// systematic error data
 	double syst_unc_t[] = { 0.4, 0.5, 1.5 };
 	//double syst_unc_val[] = { +29.0, +31.6, +26.3 };
@@ -23,7 +23,7 @@ int main()
 	TGraph *g_rel_syst_unc_t_dep = new TGraph(3, syst_unc_t, syst_unc_val);
 
 	// prepare output
-	TFile *f_out = new TFile("data.root", "recreate");
+	TFile *f_out = new TFile(outputFile.c_str(), "recreate");
 
 	TGraphErrors *g_dsdt = new TGraphErrors();
 
@@ -37,6 +37,9 @@ int main()
 
 		if (x < 0.377)
 			continue;
+
+		if (attract && fabs(x - 0.53) < 0.005)
+			y_stat_unc /= 5.;
 
 		int idx = g_dsdt->GetN();
 		g_dsdt->SetPoint(idx, x, y);
@@ -66,7 +69,11 @@ int main()
 	{
 		const double t = g_dsdt->GetX()[i];
 		const double dsdt_ref = (t < 0.95) ? ff->Eval(t) : g_dsdt->Eval(t);
-		const double unc = g_rel_syst_unc_t_dep->Eval(t) / 100. * dsdt_ref;
+		double unc = g_rel_syst_unc_t_dep->Eval(t) / 100. * dsdt_ref;
+
+		// attract
+		if (attract && fabs(t - 0.53) < 0.005)
+			unc /= 5.;
 
 		m_dsdt_cov_syst_t_dep(i, i) = unc * unc; // for the moment uncorrelated approximation
 	}
@@ -107,6 +114,14 @@ int main()
 	delete f_in;
 
 	delete f_out;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+int main()
+{
+	ProcessOne("data.root", false);
+	ProcessOne("data_att.root", true);
 
 	return 0;
 }
