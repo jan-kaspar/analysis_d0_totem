@@ -56,16 +56,28 @@ void LoadData(FILE *f_in, double addRelSystUnc, bool attract, const string &rebi
 		{
 			const auto &p = points[pi];
 
+			if (p.t_min < 0.42)
+				n_merge = 2;
+			if (p.t_min < 0.32)
+				n_merge = 3;
+		}
+
+		if (rebin == "rebinB")
+		{
+			const auto &p = points[pi];
+
 			if (p.t_min < 0.43)
 				n_merge = 2;
-			if (p.t_min < 0.35)
+			if (p.t_min < 0.41)
 				n_merge = 3;
+			if (p.t_min < 0.40)
+				n_merge = 4;
 		}
 
 		// calculate merged quantities
 		double t_min = +1E100, t_max = -1E100;
 
-		double s_v_r = 0., s_stu2_r2 = 0., s_syu2_r2 = 0.;
+		double s_v_r = 0., s_stu2_r2 = 0., s_syu_r = 0.;
 
 		for (unsigned int mi = 0; mi < n_merge; ++mi)
 		{
@@ -78,7 +90,7 @@ void LoadData(FILE *f_in, double addRelSystUnc, bool attract, const string &rebi
 
 			s_v_r += p.dsdt * r;
 			s_stu2_r2 += pow(p.dsdt_stat_unc * r, 2);
-			s_syu2_r2 += pow(p.dsdt_syst_unc_t_dep * r, 2);
+			s_syu_r += p.dsdt_syst_unc_t_dep * r;
 		}
 
 		const double R = t_max - t_min;
@@ -86,7 +98,7 @@ void LoadData(FILE *f_in, double addRelSystUnc, bool attract, const string &rebi
 		const double t_mean = (t_max + t_min) / 2.;
 		const double dsdt = s_v_r / R;
 		const double dsdt_stat_unc = sqrt(s_stu2_r2) / R;
-		const double dsdt_syst_unc_t_dep = sqrt(s_syu2_r2) / R;
+		const double dsdt_syst_unc_t_dep = s_syu_r / R;
 
 		double f = 1.;
 
@@ -128,8 +140,8 @@ void ProcessOne(const string &inputFile, const string &outputFile, double addRel
 	// make fit
 	TF1 *ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x + [3]*x*x*x) + exp([4] + [5]*x + [6]*x*x + [7]*x*x*x)");
 	ff->SetParameters(
-		4.57, -5.24, -31.3, 0.,
-		-25.2, 89.4, -117., 49.2
+		14.6, -100.0, 262.6, -299.4,
+		-20.56, 69.92, -90.0, 36.79
 	);
 	ff->SetRange(0.25, 0.9);
 
@@ -193,12 +205,17 @@ int main()
 {
 	ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data.root", 0.000, false);
 
-	ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc0.5.root", 0.005, false);
-	ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc0.8.root", 0.008, false);
-	ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc1.0.root", 0.010, false);
-	ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc1.5.root", 0.015, false);
+	//ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc0.5.root", 0.005, false);
+	//ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc0.8.root", 0.008, false);
+	//ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc1.0.root", 0.010, false);
+	//ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc1.5.root", 0.015, false);
 
-	ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc0.8_att.root", 0.008, true);
+	//ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc0.8_att.root", 0.008, true);
+
+	ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc0.8_rebinB.root", 0.008, false, "rebinB");
+
+	//ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc0.8_rebinA_att.root", 0.008, true, "rebinA");
+	ProcessOne("dsigma_dt_13TeV_90m_10sigma_complete_01062018.txt", "data_addUnc0.8_rebinB_att.root", 0.008, true, "rebinB");
 
 	return 0;
 }
