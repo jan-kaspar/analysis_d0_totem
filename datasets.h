@@ -64,8 +64,8 @@ void InitDatasets()
 	Dataset d13;
 	d13.sqrt_s = 13.;
 	d13.name = "13TeV";
-	d13.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8_att.root";
-	d13.f_in_check = topDir + "TOTEM_13TeV/data_addUnc0.8.root";
+	d13.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8_rebinB_att.root";
+	d13.f_in_check = topDir + "TOTEM_13TeV/data_addUnc0.8_rebinB.root";
 	datasets.push_back(d13);
 
 	//--------------------
@@ -81,13 +81,14 @@ void InitDatasets()
 	Dataset d8_bt1 = d8; d8_bt1.name = "8TeV-bt1"; d8_bt1.f_in = topDir + "TOTEM_8TeV/data_bt1.root"; datasets.push_back(d8_bt1);
 	*/
 
-	/*
-	{ Dataset d = d13; d.name = "13TeV-addUnc0.5"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc0.5.root"; datasets.push_back(d); }
-	{ Dataset d = d13; d.name = "13TeV-addUnc0.8"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8.root"; datasets.push_back(d); }
-	{ Dataset d = d13; d.name = "13TeV-addUnc0.8-att"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8_att.root"; datasets.push_back(d); }
-	{ Dataset d = d13; d.name = "13TeV-addUnc1.0"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc1.0.root"; datasets.push_back(d); }
-	{ Dataset d = d13; d.name = "13TeV-addUnc1.5"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc1.5.root"; datasets.push_back(d); }
-	*/
+	//{ Dataset d = d13; d.name = "13TeV-addUnc0.5"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc0.5.root"; datasets.push_back(d); }
+	//{ Dataset d = d13; d.name = "13TeV-addUnc0.8"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8.root"; datasets.push_back(d); }
+	//{ Dataset d = d13; d.name = "13TeV-addUnc0.8-att"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8_att.root"; datasets.push_back(d); }
+	//{ Dataset d = d13; d.name = "13TeV-addUnc1.0"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc1.0.root"; datasets.push_back(d); }
+	//{ Dataset d = d13; d.name = "13TeV-addUnc1.5"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc1.5.root"; datasets.push_back(d); }
+
+	//{ Dataset d = d13; d.name = "13TeV-addUnc0.8-rebinA-att"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8_rebinA_att.root"; datasets.push_back(d); }
+	//{ Dataset d = d13; d.name = "13TeV-addUnc0.8-rebinB-att"; d.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8_rebinB_att.root"; datasets.push_back(d); }
 
 	//--------------------
 
