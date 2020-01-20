@@ -616,6 +616,9 @@ int main(int argc, const char **argv)
 
 	for (const auto ds : datasets)
 	{
+		if (!ds.use_for_extrapolation)
+			continue;
+
 		TVectorD *par = (TVectorD *) f_in->Get((ds.name + "/par").c_str());
 		TMatrixDSym *par_V = (TMatrixDSym *) f_in->Get((ds.name + "/par_V").c_str());
 

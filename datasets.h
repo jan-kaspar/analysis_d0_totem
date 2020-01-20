@@ -24,6 +24,8 @@ struct Dataset
 	TF1 *ff = NULL;
 	map<unsigned int, ParameterConstraint> constraints;
 
+	bool use_for_extrapolation = false;
+
 	void AddConstraint(unsigned int pi, double mean, double sigma)
 	{
 		constraints.insert({pi, {mean, sigma}});
@@ -45,6 +47,7 @@ void InitDatasets()
 	d2.name = "2.76TeV";
 	d2.f_in = topDir + "TOTEM_2.76TeV/data.root";
 	d2.f_in_check = topDir + "TOTEM_2.76TeV/data.root";
+	d2.use_for_extrapolation = true;
 	datasets.push_back(d2);
 
 	Dataset d7;
@@ -52,6 +55,7 @@ void InitDatasets()
 	d7.name = "7TeV";
 	d7.f_in = topDir + "TOTEM_7TeV/data_att.root";
 	d7.f_in_check = topDir + "TOTEM_7TeV/data.root";
+	d7.use_for_extrapolation = true;
 	datasets.push_back(d7);
 
 	Dataset d8;
@@ -59,6 +63,7 @@ void InitDatasets()
 	d8.name = "8TeV";
 	d8.f_in = topDir + "TOTEM_8TeV/data_bt1.root";
 	d8.f_in_check = topDir + "TOTEM_8TeV/data_bt1.root";
+	d8.use_for_extrapolation = true;
 	datasets.push_back(d8);
 
 	Dataset d13;
@@ -66,6 +71,7 @@ void InitDatasets()
 	d13.name = "13TeV";
 	d13.f_in = topDir + "TOTEM_13TeV/data_addUnc0.8_rebinB_att.root";
 	d13.f_in_check = topDir + "TOTEM_13TeV/data_addUnc0.8_rebinB.root";
+	d13.use_for_extrapolation = true;
 	datasets.push_back(d13);
 
 	//--------------------
