@@ -10,10 +10,10 @@ using namespace std;
 
 //----------------------------------------------------------------------------------------------------
 
-void ProcessOne(const string &outputFile, bool attract)
+void ProcessOne(const string &outputFile, bool attract, bool reducedSyst)
 {
 	// get input data
-	TFile *f_in = new TFile("publication1_graph.root");
+	TFile *f_in = new TFile("publication_3.5m.root");
 	TGraphErrors *g = (TGraphErrors *) f_in->Get("g1");
 
 	// systematic error data
@@ -71,6 +71,9 @@ void ProcessOne(const string &outputFile, bool attract)
 		const double dsdt_ref = (t < 0.95) ? ff->Eval(t) : g_dsdt->Eval(t);
 		double unc = g_rel_syst_unc_t_dep->Eval(t) / 100. * dsdt_ref;
 
+		if (reducedSyst)
+			unc /= 100;
+
 		// attract
 		if (attract && fabs(t - 0.53) < 0.005)
 			unc /= 5.;
@@ -120,8 +123,11 @@ void ProcessOne(const string &outputFile, bool attract)
 
 int main()
 {
-	ProcessOne("data.root", false);
-	ProcessOne("data_att.root", true);
+	ProcessOne("data.root", false, false);
+	ProcessOne("data_redSyst.root", false, true);
+
+	ProcessOne("data_att.root", true, false);
+	ProcessOne("data_att_redSyst.root", true, true);
 
 	return 0;
 }
