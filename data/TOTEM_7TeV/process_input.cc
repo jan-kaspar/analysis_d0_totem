@@ -10,7 +10,7 @@ using namespace std;
 
 //----------------------------------------------------------------------------------------------------
 
-void ProcessOne(const string &outputFile, bool attract, bool reducedSyst)
+void ProcessOne(const string &outputFile, bool renormalise, bool attract)
 {
 	// get input data
 	TFile *f_in = new TFile("publication_3.5m.root");
@@ -21,6 +21,9 @@ void ProcessOne(const string &outputFile, bool attract, bool reducedSyst)
 	//double syst_unc_val[] = { +29.0, +31.6, +26.3 };
 	double syst_unc_val[] = { +13.0, +13.0, +13.0 }; // temporarily use more reasonable numbers
 	TGraph *g_rel_syst_unc_t_dep = new TGraph(3, syst_unc_t, syst_unc_val);
+
+	// re-normalisation
+	const double renorm_factor = 0.848;
 
 	// prepare output
 	TFile *f_out = new TFile(outputFile.c_str(), "recreate");
@@ -37,6 +40,12 @@ void ProcessOne(const string &outputFile, bool attract, bool reducedSyst)
 
 		if (x < 0.377)
 			continue;
+
+		if (renormalise)
+		{
+			y *= renorm_factor;
+			y_stat_unc *= renorm_factor;
+		}
 
 		if (attract && fabs(x - 0.53) < 0.005)
 			y_stat_unc /= 5.;
@@ -71,9 +80,6 @@ void ProcessOne(const string &outputFile, bool attract, bool reducedSyst)
 		const double dsdt_ref = (t < 0.95) ? ff->Eval(t) : g_dsdt->Eval(t);
 		double unc = g_rel_syst_unc_t_dep->Eval(t) / 100. * dsdt_ref;
 
-		if (reducedSyst)
-			unc /= 100;
-
 		// attract
 		if (attract && fabs(t - 0.53) < 0.005)
 			unc /= 5.;
@@ -83,8 +89,9 @@ void ProcessOne(const string &outputFile, bool attract, bool reducedSyst)
 
 	m_dsdt_cov_syst_t_dep.Write("m_dsdt_cov_syst_t_dep");
 
-	//const double rel_syst_t_indep = 0.11;
-	const double rel_syst_t_indep = 0.27; // temporarily use more reasonable numbers
+	double rel_syst_t_indep = 0.27; // temporarily use more reasonable numbers
+	if (renormalise)
+		rel_syst_t_indep = 0.12;
 
 	TVectorD v_rel_syst_t_indep(1);
 	v_rel_syst_t_indep(0) = rel_syst_t_indep;
@@ -124,10 +131,10 @@ void ProcessOne(const string &outputFile, bool attract, bool reducedSyst)
 int main()
 {
 	ProcessOne("data.root", false, false);
-	ProcessOne("data_redSyst.root", false, true);
+	ProcessOne("data_renorm.root", true, false);
 
-	ProcessOne("data_att.root", true, false);
-	ProcessOne("data_att_redSyst.root", true, true);
+	ProcessOne("data_att.root", false, true);
+	ProcessOne("data_renorm_att.root", true, true);
 
 	return 0;
 }

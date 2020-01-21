@@ -53,8 +53,8 @@ void InitDatasets()
 	Dataset d7;
 	d7.sqrt_s = 7.;
 	d7.name = "7TeV";
-	d7.f_in = topDir + "TOTEM_7TeV/data_att.root";
-	d7.f_in_check = topDir + "TOTEM_7TeV/data.root";
+	d7.f_in = topDir + "TOTEM_7TeV/data_renorm_att.root";
+	d7.f_in_check = topDir + "TOTEM_7TeV/data_renorm.root";
 	d7.use_for_extrapolation = true;
 	datasets.push_back(d7);
 
