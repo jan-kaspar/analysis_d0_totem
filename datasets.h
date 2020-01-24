@@ -275,7 +275,15 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		ds.ff = new TF1("ff", buf);
 
 		// these are the parameters at f=0.5
-		if (ds.name.find("2.76TeV") == 0) { ds.ff->SetParameters(-3.47, -18.8, -14.9, -4., -26., 40.); ds.AddConstraint(4, -26., 3.); ds.AddConstraint(5, 40., 15.); }
+		if (ds.name.find("2.76TeV") == 0) { ds.ff->SetParameters(-3.47, -18.8, -14.9, -4., -26., 40.);
+			//ds.AddConstraint(0, -2.6, 0.4);
+			//ds.AddConstraint(1, -22.9, 0.5);
+			ds.AddConstraint(2, 0., 10.); // from 7 and 8 TeV it gives +27.1
+
+			//ds.AddConstraint(3, -4.1, 0.1);
+			ds.AddConstraint(4, -21.2, 2.);
+			ds.AddConstraint(5, 42.3, 15.);
+		}
 		if (ds.name.find("7TeV") == 0) ds.ff->SetParameters(-3.31, -25.3, -6.27, -3.62, -22.6, 39.0);
 		if (ds.name.find("8TeV") == 0) ds.ff->SetParameters(-3.24, -30.6, -56.7, -3.50, -22.8, 42.0);
 		if (ds.name.find("13TeV") == 0) ds.ff->SetParameters(-2.70, -33.2, -67.9, -3.03, -20.6, 43.1);
