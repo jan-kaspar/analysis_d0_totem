@@ -102,6 +102,13 @@ void LoadInput(const Dataset &ds, InputData &id, bool useCheckFile = false)
 			{
 				id.binData[i].dsdt_unc_syst_t_dep = sqrt(con_syst_t_dep);
 				id.binData[i].dsdt_unc_syst_full = sqrt(con_syst_t_dep + con_syst_t_indep);
+
+				if (!useCheckFile)
+				{
+					const auto &bd = id.binData[i];
+					const double dsdt_full_unc = sqrt(bd.dsdt_unc_stat*bd.dsdt_unc_stat + bd.dsdt_unc_syst_full*bd.dsdt_unc_syst_full);
+					printf("%2i | %.4f, %.4f | %.4f, %.4f\n", i, bd.t, bd.t_unc, bd.dsdt, dsdt_full_unc);
+				}
 			}
 		}
 	}
