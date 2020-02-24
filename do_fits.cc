@@ -507,6 +507,24 @@ void BuildComponentPlots(const Dataset &ds, const string fitModel)
 		components.push_back(ff_comp2);
 	}
 
+	if (fitModel.find("e012t0+e0123t0") == 0)
+	{
+		TF1 *ff_comp1 = new TF1(*ds.ff);
+		ff_comp1->SetName("g_comp1");
+		ff_comp1->SetParameter(3, -1E10);
+		ff_comp1->SetParameter(4, 0.);
+		ff_comp1->SetParameter(5, 0.);
+		ff_comp1->SetParameter(6, 0.);
+		components.push_back(ff_comp1);
+
+		TF1 *ff_comp2 = new TF1(*ds.ff);
+		ff_comp2->SetName("g_comp2");
+		ff_comp2->SetParameter(0, -1E10);
+		ff_comp2->SetParameter(1, 0.);
+		ff_comp2->SetParameter(2, 0.);
+		components.push_back(ff_comp2);
+	}
+
 	// sample components
 	for (const auto f : components)
 	{

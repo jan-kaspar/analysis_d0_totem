@@ -111,9 +111,9 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 
 	if (tRangeModel == "bootstrap")
 	{
-		if (ds.name == "2.76TeV")	{ ds.t_min = 0.350; ds.t_dip = 0.616; ds.t_bmp = 0.700; ds.t_max = 0.800; }
+		if (ds.name == "2.76TeV")	{ ds.t_min = 0.350; ds.t_dip = 0.616; ds.t_bmp = 0.700; ds.t_max = 1.000; }
 		if (ds.name == "7TeV")		{ ds.t_min = 0.250; ds.t_dip = 0.530; ds.t_bmp = 0.694; ds.t_max = 0.950; }
-		if (ds.name == "8TeV")		{ ds.t_min = 0.250; ds.t_dip = 0.518; ds.t_bmp = 0.687; ds.t_max = 1.100; }
+		if (ds.name == "8TeV")		{ ds.t_min = 0.250; ds.t_dip = 0.518; ds.t_bmp = 0.687; ds.t_max = 1.050; }
 		if (ds.name == "13TeV")		{ ds.t_min = 0.320; ds.t_dip = 0.470; ds.t_bmp = 0.638; ds.t_max = 0.870; }
 	}
 
@@ -138,7 +138,7 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 
 	if (tRangeModel == "low_t,high_t")
 	{
-		if (ds.name.find("2.76TeV") == 0)	{ ds.t_min = 0.448; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.950; }
+		if (ds.name.find("2.76TeV") == 0)	{ ds.t_min = 0.448; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.961; }
 		if (ds.name.find("7TeV") == 0)		{ ds.t_min = 0.368; ds.t_dip = 0.529; ds.t_bmp = 0.693; ds.t_max = 0.885; }
 		if (ds.name.find("8TeV") == 0)		{ ds.t_min = 0.373; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 0.915; }
 		if (ds.name.find("13TeV") == 0)		{ ds.t_min = 0.338; ds.t_dip = 0.468; ds.t_bmp = 0.639; ds.t_max = 0.863; }
@@ -168,8 +168,18 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 	{
 		if (ds.name == "2.76TeV")
 		{
-			ds.ff = new TF1("ff", "exp([0] + [1]*x) + exp([2] + [3]*x + [4]*x*x)");
-			ds.ff->SetParameters(6.75, -19.3, -116., 319., -228.);
+			ds.ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x + [3]*x*x*x) + exp([4] + [5]*x + [6]*x*x + [7]*x*x*x)");
+			ds.ff->SetParameters(
+				6.848, -1.955E+01, +6.801E-02, 1E-4,
+				-8.105E+01, +2.665E+02, -3.036E+02, +1.134E+02
+			);
+
+			ds.AddConstraint(3, 0., 1E-5);
+
+			ds.AddConstraint(4, -8.105E+01, 0.1);
+			ds.AddConstraint(5, +2.665E+02, 0.1);
+			ds.AddConstraint(6, -3.036E+02, 0.1);
+			ds.AddConstraint(7, +1.134E+02, 0.1);
 		}
 
 		if (ds.name == "7TeV")
@@ -260,13 +270,12 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		if (ds.name.find("2.76TeV") == 0)
 		{
 			// "approved fits" from Dec 2019
-			/*
 			ds.ff->SetParameters(-3.47, -18.8, -14.9, -4., -26., 40.);
 			ds.AddConstraint(4, -26., 3.);
 			ds.AddConstraint(5, 40., 15.);
-			*/
 
 			// test
+			/*
 			ds.ff->SetParameters(-3.47, -18.8, -14.9, -4., -26., 40.);
 			//ds.AddConstraint(0, -2.6, 0.4);
 			//ds.AddConstraint(1, -22.9, 0.5);
@@ -275,6 +284,7 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 			//ds.AddConstraint(3, -4.1, 0.1);
 			ds.AddConstraint(4, -21.2, 2.);
 			ds.AddConstraint(5, 42.3, 15.);
+			*/
 		}
 
 		if (ds.name.find("7TeV") == 0) ds.ff->SetParameters(-3.31, -25.3, -6.27, -3.62, -22.6, 39.0);
@@ -296,6 +306,49 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 
 		//for (double t : { 0.40, 0.45, 0.50 })
 		//	printf("t=%.2f --> f=%.4f\n", t, ds.ff->Eval(t));
+
+		return;
+	}
+
+	// for a test
+	if (fitModel == "e012t0+e012t0")
+	{
+		ds.ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x) + exp([3] + [4]*x + [5]*x*x)");
+
+		if (ds.name == "2.76TeV")
+		{
+			ds.ff->SetParameters(5.16, 8.20, -30.1, -20.2, 39.9, -24.66);
+		}
+
+		if (ds.name == "7TeV") { ds.ff->SetParameters(-8.35, 54.44, -97.95, -11.11, 20.32, -14.18); }
+
+		if (ds.name == "8TeV") { ds.ff->SetParameters(-3.68, 34.97, -76.39, -13.05, 26.44, -18.29); }
+
+		if (ds.name == "13TeV") { ds.ff->SetParameters(-10.01, 78.9, -151.3, -10.7, 23.6, -18.11); }
+
+		return;
+	}
+
+	// for a test
+	if (fitModel == "e012t0+e0123t0")
+	{
+		ds.ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x) + exp([3] + [4]*x + [5]*x*x + [6]*x*x*x)");
+
+		if (ds.name == "2.76TeV")
+		{
+			ds.ff->SetParameters(-10.88, +52.35, -72.68, -16.66, +26.04, -5.778, -8.888);
+
+			ds.AddConstraint(3, -16.66, 0.1);
+			ds.AddConstraint(4, +26.04, 0.1);
+			ds.AddConstraint(5, -5.778, 0.1);
+			ds.AddConstraint(6, -8.888, 0.1);
+		}
+
+		if (ds.name == "7TeV") { ds.ff->SetParameters(-8.35, 54.44, -97.95, -11.11, 20.32, -14.18, 1E-4); }
+
+		if (ds.name == "8TeV") { ds.ff->SetParameters(-3.68, 34.97, -76.39, -13.05, 26.44, -18.29, 1E-4); }
+
+		if (ds.name == "13TeV") { ds.ff->SetParameters(-10.01, 78.9, -151.3, -10.7, 23.6, -18.11, 1E-4); }
 
 		return;
 	}
