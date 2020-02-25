@@ -53,8 +53,8 @@ void InitDatasets()
 	Dataset d7;
 	d7.sqrt_s = 7.;
 	d7.name = "7TeV";
-	d7.f_in = topDir + "TOTEM_7TeV/data_renorm_att.root";
-	d7.f_in_check = topDir + "TOTEM_7TeV/data_renorm.root";
+	d7.f_in = topDir + "TOTEM_7TeV/data_att.root";
+	d7.f_in_check = topDir + "TOTEM_7TeV/data.root";
 	d7.use_for_extrapolation = true;
 	datasets.push_back(d7);
 
@@ -138,17 +138,17 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 
 	if (tRangeModel == "low_t,high_t")
 	{
-		if (ds.name.find("2.76TeV") == 0)	{ ds.t_min = 0.448; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.961; }
+		if (ds.name.find("2.76TeV") == 0)	{ ds.t_min = 0.445; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.961; }
 		if (ds.name.find("7TeV") == 0)		{ ds.t_min = 0.368; ds.t_dip = 0.529; ds.t_bmp = 0.693; ds.t_max = 0.885; }
 		if (ds.name.find("8TeV") == 0)		{ ds.t_min = 0.373; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 0.915; }
 		if (ds.name.find("13TeV") == 0)		{ ds.t_min = 0.338; ds.t_dip = 0.468; ds.t_bmp = 0.639; ds.t_max = 0.863; }
 
-		if (ds.name == "1.96TeV")			{ ds.t_min = 0.466; ds.t_dip = 0.656; ds.t_bmp = 0.836; ds.t_max = 1.003;
+		if (ds.name == "1.96TeV")			{ ds.t_min = 0.462; ds.t_dip = 0.656; ds.t_bmp = 0.836; ds.t_max = 1.003;
 			double cov_data[16] = {
-				5.906E-05, 0., 0., 0.,
-				0., 7.382E-05, 0., 0.,
-				0., 0., 4.425E-04, 0.,
-				0., 0., 0., 4.264E-03
+				9.154E-05, 0., 0., 0.,
+				0., 8.781E-05, 0., 0.,
+				0., 0., 3.545E-04, 0.,
+				0., 0., 0., 4.160E-03
 			};
 			ds.m_t_value_cov.ResizeTo(4, 4);
 			ds.m_t_value_cov.SetMatrixArray(cov_data);
@@ -270,9 +270,11 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		if (ds.name.find("2.76TeV") == 0)
 		{
 			// "approved fits" from Dec 2019
+			/*
 			ds.ff->SetParameters(-3.47, -18.8, -14.9, -4., -26., 40.);
 			ds.AddConstraint(4, -26., 3.);
 			ds.AddConstraint(5, 40., 15.);
+			*/
 
 			// test
 			/*
@@ -285,6 +287,12 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 			ds.AddConstraint(4, -21.2, 2.);
 			ds.AddConstraint(5, 42.3, 15.);
 			*/
+
+			// test2
+			ds.ff->SetParameters(-3.47, -18.8, -14.9, -4., -26., 40.);
+			//ds.AddConstraint(3, -4.0, 0.1);
+			ds.AddConstraint(4, -24., 3.);
+			ds.AddConstraint(5, 40., 15.);
 		}
 
 		if (ds.name.find("7TeV") == 0) ds.ff->SetParameters(-3.31, -25.3, -6.27, -3.62, -22.6, 39.0);
