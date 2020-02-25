@@ -53,6 +53,21 @@ void ProcessOne(const string &inputFile, const string &outputFile, bool highT)
 		}
 	}
 
+	// additional steering points
+	/*
+	{
+		int idx = g_dsdt->GetN();
+		g_dsdt->SetPoint(idx, 0.80, 1.70E-2);
+		g_dsdt->SetPointError(idx, 0.01, 0.05E-2);
+		g_dsdt_syst_unc_t_dep->SetPoint(idx, 0., 0.05E-2);
+
+		idx = g_dsdt->GetN();
+		g_dsdt->SetPoint(idx, 0.97, 0.90E-2);
+		g_dsdt->SetPointError(idx, 0.01, 0.05E-2);
+		g_dsdt_syst_unc_t_dep->SetPoint(idx, 0., 0.05E-2);
+	}
+	*/
+
 	// make fit
 	TF1 *ff = NULL;
 
@@ -60,15 +75,19 @@ void ProcessOne(const string &inputFile, const string &outputFile, bool highT)
 	{
 		ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x + [3]*x*x*x) + exp([4] + [5]*x + [6]*x*x + [7]*x*x*x)");
 		ff->SetParameters(
-			6.75, -19.3, 0., 0.,
-			-116., 319., -228., 0.
+			5.14, -11.89, -8.326, 0.,
+			-79.00, 264.0, -306.5, 116.7
 		);
-		ff->FixParameter(2, 0.);
-		ff->FixParameter(3, 0.);
-		ff->FixParameter(7, 0.);
-		ff->SetRange(0.35, 0.9);
 
-		g_dsdt->Fit(ff, "", "", 0.35, 0.8);
+		ff->FixParameter(3, 0.);
+
+		ff->FixParameter(4, -79.00);
+		ff->FixParameter(5, 264.0);
+		ff->FixParameter(6, -306.5);
+		ff->FixParameter(7, 116.7);
+		ff->SetRange(0.35, 1.0);
+
+		g_dsdt->Fit(ff, "", "", 0.35, 1.0);
 	} else {
 		ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x)");
 		ff->SetParameters(
