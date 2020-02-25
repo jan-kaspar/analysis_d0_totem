@@ -96,8 +96,8 @@ for (int dsi : datasets.keys)
 	NewPad("$|t|\ung{GeV^2}$", "$\d\si/\d t\ung{mb/GeV^2}$");
 	scale(Linear, Log);
 
-	TGraph_x_min = t_min;
-	TGraph_x_max = t_max;
+	//TGraph_x_min = t_min;
+	//TGraph_x_max = t_max;
 
 	DrawUncBand(g_dsdt, g_dsdt_syst_full, yellow);
 	DrawUncBand(g_dsdt, g_dsdt_syst_t_dep, heavygreen);
@@ -108,7 +108,7 @@ for (int dsi : datasets.keys)
 
 	draw(g_dsdt, "p", blue, mCi+0.5pt);
 
-	limits((0.3, 4e-3), (0.95, 5e-1), Crop);
+	limits((0.3, 4e-3), (1.1, 5e-1), Crop);
 
 	AddToLegend("<$\ch^2/\hbox{ndf} = " + format("%#.1f / (", chi2) + format("%.0f", n_fit_points) + format(" - %.0f)", n_fit_points - ndf) + format(" = %#.1f$", chi2_ndf));
 	AddToLegend(format("<$\hbox{p-value} = %#.1f\un{\%}$", p_value * 100.));
@@ -181,7 +181,7 @@ for (int dsi : datasets.keys)
 	draw(gr_fit_pl_unc, red+dashed);
 	draw(gr_fit_mi_unc, red+dashed);
 
-	xlimits(0.3, 0.95, Crop);
+	xlimits(0.3, 1.1, Crop);
 }
 
 //----------------------------------------------------------------------------------------------------

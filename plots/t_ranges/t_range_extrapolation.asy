@@ -6,7 +6,7 @@ include "../templates/common_code.asy";
 string top_dir = "../../";
 
 string methods[];
-methods.push("minimal");
+//methods.push("minimal");
 methods.push("low_t,high_t");
 
 string quantities[], q_labels[];

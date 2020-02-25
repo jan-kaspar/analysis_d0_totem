@@ -71,6 +71,8 @@ for (int pari = 0; pari < n_parameters; ++pari)
 				currentpad.yTicks = RightTicks(10., 2.);
 			*/
 
+			//AttachLegend(format("%.3f", g_fit.rExec("Eval", 2.76)));
+
 			yaxis(XEquals(sqrt_s_ext, false), heavygreen);
 		}
 	}
