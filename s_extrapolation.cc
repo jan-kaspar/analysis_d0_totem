@@ -484,7 +484,8 @@ void SaveExtrapolation(const ROOT::Fit::FitResult &result, const string &extrapo
 
 	for (unsigned int i = 0; i < n_dsdt_samples; ++i)
 	{
-		const double t = ds.t_min + (ds.t_max - ds.t_min) / (n_dsdt_samples - 1) * i;
+		const double t_min_eff = ds.t_min * 0.8;
+		const double t = t_min_eff + (ds.t_max - t_min_eff) / (n_dsdt_samples - 1) * i;
 		const double f_dsdt = ds.ff->Eval(t);
 		const double f_B = (log(ds.ff->Eval(t + ep)) - log(f_dsdt)) / ep;
 

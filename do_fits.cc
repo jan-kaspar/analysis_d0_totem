@@ -58,9 +58,13 @@ void LoadInput(const Dataset &ds, InputData &id, bool useCheckFile = false)
 
 	id.eta_unc = (*v_rel_syst_t_indep)(0);
 
-	// get bin data
+	// adjust t_min cut
 	double t_min_eff = ds.t_min;
 
+	if (ds.name.find("2.76TeV") != string::npos)
+		t_min_eff = 0.35;
+
+	// get bin data
 	int idx_min = 100000, idx_max = -1000000;
 	for (int i = 0; i < g_dsdt->GetN(); ++i)
 	{
@@ -331,7 +335,8 @@ void BuildUncertaintyBand(const Dataset &ds, const ROOT::Fit::FitResult &result,
 		// sample biased fit
 		for (unsigned int i = 0; i < n_points; ++i)
 		{
-			const double t = ds.t_min + (ds.t_max - ds.t_min) / (n_points - 1) * i;
+			const double t_min_eff = ds.t_min * 0.8;
+			const double t = t_min_eff + (ds.t_max - t_min_eff) / (n_points - 1) * i;
 			const double f_dsdt = eta * ff_mod->Eval(t);
 
 			stat[i].Fill(f_dsdt);
@@ -372,7 +377,8 @@ void BuildUncertaintyBand(const Dataset &ds, const ROOT::Fit::FitResult &result,
 
 	for (unsigned int i = 0; i < n_points; ++i)
 	{
-		const double t = ds.t_min + (ds.t_max - ds.t_min) / (n_points - 1) * i;
+		const double t_min_eff = ds.t_min * 0.8;
+		const double t = t_min_eff + (ds.t_max - t_min_eff) / (n_points - 1) * i;
 
 		const double f_dsdt = ds.ff->Eval(t);
 		const double f_unc = stat[i].GetStdDev(0);
@@ -417,7 +423,8 @@ void BuildSensitivtyPlot(const Dataset &ds)
 
 			for (unsigned int i = 0; i < n_points; ++i)
 			{
-				const double t = ds.t_min + (ds.t_max - ds.t_min) / (n_points - 1) * i;
+				const double t_min_eff = ds.t_min * 0.8;
+				const double t = t_min_eff + (ds.t_max - t_min_eff) / (n_points - 1) * i;
 
 				int idx = g->GetN();
 				g->SetPoint(idx, t, ff_mod->Eval(t));
@@ -533,7 +540,8 @@ void BuildComponentPlots(const Dataset &ds, const string fitModel)
 
 		for (unsigned int i = 0; i < n_points; ++i)
 		{
-			const double t = ds.t_min + (ds.t_max - ds.t_min) / (n_points - 1) * i;
+			const double t_min_eff = ds.t_min * 0.8;
+			const double t = t_min_eff + (ds.t_max - t_min_eff) / (n_points - 1) * i;
 
 			int idx = g->GetN();
 			g->SetPoint(idx, t, f->Eval(t));
