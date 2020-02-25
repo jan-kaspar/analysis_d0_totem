@@ -140,7 +140,7 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 	{
 		if (ds.name.find("2.76TeV") == 0)	{ ds.t_min = 0.445; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.961; }
 		if (ds.name.find("7TeV") == 0)		{ ds.t_min = 0.368; ds.t_dip = 0.529; ds.t_bmp = 0.693; ds.t_max = 0.885; }
-		if (ds.name.find("8TeV") == 0)		{ ds.t_min = 0.373; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 0.915; }
+		if (ds.name.find("8TeV") == 0)		{ ds.t_min = 0.373; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 1.010; }
 		if (ds.name.find("13TeV") == 0)		{ ds.t_min = 0.338; ds.t_dip = 0.468; ds.t_bmp = 0.639; ds.t_max = 0.863; }
 
 		if (ds.name == "1.96TeV")			{ ds.t_min = 0.462; ds.t_dip = 0.656; ds.t_bmp = 0.836; ds.t_max = 1.003;

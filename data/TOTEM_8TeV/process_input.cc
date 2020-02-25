@@ -66,7 +66,7 @@ void ProcessOne(const string &input, const string &output)
 	for (int i = 0; i < dim; ++i)
 	{
 		const double t = g_dsdt->GetX()[i];
-		const double dsdt_ref = (t < 0.95) ? ff->Eval(t) : g_dsdt->Eval(t);
+		const double dsdt_ref = (t < 1.01) ? ff->Eval(t) : g_dsdt->Eval(t);
 		const double unc = 0.03 * dsdt_ref; // just a crude approximation
 
 		m_dsdt_cov_syst_t_dep(i, i) = unc * unc; // for the moment uncorrelated approximation
@@ -90,7 +90,7 @@ void ProcessOne(const string &input, const string &output)
 	{
 		double t = g_dsdt->GetX()[i];
 
-		v_dsdt_syst_t_indep(i) = (t < 1.0) ? rel_syst_t_indep * ff->Eval(t) : 0.;
+		v_dsdt_syst_t_indep(i) = (t < 1.01) ? rel_syst_t_indep * ff->Eval(t) : 0.;
 
 		g_dsdt_syst_t_dep->SetPoint(i, t, sqrt(m_dsdt_cov_syst_t_dep(i, i)));
 		g_dsdt_syst_t_indep->SetPoint(i, t, v_dsdt_syst_t_indep(i));
