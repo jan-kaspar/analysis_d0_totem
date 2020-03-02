@@ -45,7 +45,7 @@ void InitDatasets()
 	Dataset d2;
 	d2.sqrt_s = 2.76;
 	d2.name = "2.76TeV";
-	d2.f_in = topDir + "TOTEM_2.76TeV/data.root";
+	d2.f_in = topDir + "TOTEM_2.76TeV/data_att.root";
 	d2.f_in_check = topDir + "TOTEM_2.76TeV/data.root";
 	d2.use_for_extrapolation = true;
 	datasets.push_back(d2);
@@ -111,10 +111,10 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 
 	if (tRangeModel == "bootstrap")
 	{
-		if (ds.name == "2.76TeV")	{ ds.t_min = 0.350; ds.t_dip = 0.616; ds.t_bmp = 0.700; ds.t_max = 1.000; }
+		if (ds.name == "2.76TeV")	{ ds.t_min = 0.350; ds.t_dip = 0.616; ds.t_bmp = 0.800; ds.t_max = 1.000; }
 		if (ds.name == "7TeV")		{ ds.t_min = 0.250; ds.t_dip = 0.530; ds.t_bmp = 0.694; ds.t_max = 0.950; }
 		if (ds.name == "8TeV")		{ ds.t_min = 0.250; ds.t_dip = 0.518; ds.t_bmp = 0.687; ds.t_max = 1.050; }
-		if (ds.name == "13TeV")		{ ds.t_min = 0.320; ds.t_dip = 0.470; ds.t_bmp = 0.638; ds.t_max = 0.870; }
+		if (ds.name == "13TeV")		{ ds.t_min = 0.250; ds.t_dip = 0.470; ds.t_bmp = 0.638; ds.t_max = 0.870; }
 	}
 
 	if (tRangeModel == "minimal")
@@ -136,7 +136,7 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 		}
 	}
 
-	if (tRangeModel == "low_t,high_t")
+	if (tRangeModel == "lt-17,ht")
 	{
 		if (ds.name.find("2.76TeV") == 0)	{ ds.t_min = 0.445; ds.t_dip = 0.616; ds.t_bmp = 0.790; ds.t_max = 0.961; }
 		if (ds.name.find("7TeV") == 0)		{ ds.t_min = 0.368; ds.t_dip = 0.529; ds.t_bmp = 0.693; ds.t_max = 0.885; }
@@ -149,6 +149,45 @@ void BuildTRanges(const string tRangeModel, Dataset &ds)
 				0., 8.781E-05, 0., 0.,
 				0., 0., 3.545E-04, 0.,
 				0., 0., 0., 4.160E-03
+			};
+			ds.m_t_value_cov.ResizeTo(4, 4);
+			ds.m_t_value_cov.SetMatrixArray(cov_data);
+		}
+	}
+
+	if (tRangeModel == "lts-50,ht")
+	{
+		if (ds.name.find("2.76TeV") == 0)	{ ds.t_min = 0.406; ds.t_dip = 0.626; ds.t_bmp = 0.774; ds.t_max = 0.955; }
+		if (ds.name.find("7TeV") == 0)		{ ds.t_min = 0.341; ds.t_dip = 0.529; ds.t_bmp = 0.693; ds.t_max = 0.885; }
+		if (ds.name.find("8TeV") == 0)		{ ds.t_min = 0.334; ds.t_dip = 0.518; ds.t_bmp = 0.700; ds.t_max = 1.010; } // t_max increased to include one more point
+		if (ds.name.find("13TeV") == 0)		{ ds.t_min = 0.303; ds.t_dip = 0.470; ds.t_bmp = 0.639; ds.t_max = 0.865; }
+
+		if (ds.name == "1.96TeV")			{ ds.t_min = 0.427; ds.t_dip = 0.660; ds.t_bmp = 0.824; ds.t_max = 0.979;
+			double cov_data[16] = {
+				2.460E-05, 0., 0., 0.,
+				0., 5.589E-06, 0., 0.,
+				0., 0., 1.199E-04, 0.,
+				0., 0., 0., 1.268E-03
+			};
+			ds.m_t_value_cov.ResizeTo(4, 4);
+			ds.m_t_value_cov.SetMatrixArray(cov_data);
+		}
+	}
+
+
+	if (tRangeModel == "lts-100,ht")
+	{
+		if (ds.name.find("2.76TeV") == 0)	{ ds.t_min = 0.373; ds.t_dip = 0.626; ds.t_bmp = 0.774; ds.t_max = 0.953; }
+		if (ds.name.find("7TeV") == 0)		{ ds.t_min = 0.315; ds.t_dip = 0.529; ds.t_bmp = 0.693; ds.t_max = 0.885; }
+		if (ds.name.find("8TeV") == 0)		{ ds.t_min = 0.302; ds.t_dip = 0.521; ds.t_bmp = 0.701; ds.t_max = 1.010; } // t_max increased to include one more point
+		if (ds.name.find("13TeV") == 0)		{ ds.t_min = 0.274; ds.t_dip = 0.470; ds.t_bmp = 0.639; ds.t_max = 0.865; }
+
+		if (ds.name == "1.96TeV")			{ ds.t_min = 0.394; ds.t_dip = 0.660; ds.t_bmp = 0.824; ds.t_max = 0.979;
+			double cov_data[16] = {
+				2.277E-05, 0., 0., 0.,
+				0., 5.325E-06, 0., 0.,
+				0., 0., 1.199E-04, 0.,
+				0., 0., 0., 1.268E-03
 			};
 			ds.m_t_value_cov.ResizeTo(4, 4);
 			ds.m_t_value_cov.SetMatrixArray(cov_data);
@@ -170,16 +209,20 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 		{
 			ds.ff = new TF1("ff", "exp([0] + [1]*x + [2]*x*x + [3]*x*x*x) + exp([4] + [5]*x + [6]*x*x + [7]*x*x*x)");
 			ds.ff->SetParameters(
-				6.848, -1.955E+01, +6.801E-02, 1E-4,
-				-8.105E+01, +2.665E+02, -3.036E+02, +1.134E+02
+				+5.728E+00, -1.454E+01, -5.711E+00, +1E-6,
+				-7.143E+01, +2.324E+02, -2.642E+02, +9.837E+01
 			);
+
+			ds.AddConstraint(0, +5.728E+00, 0.1);
+			ds.AddConstraint(1, -1.454E+01, 0.1);
+			ds.AddConstraint(2, -5.711E+00, 0.1);
 
 			ds.AddConstraint(3, 0., 1E-5);
 
-			ds.AddConstraint(4, -8.105E+01, 0.1);
-			ds.AddConstraint(5, +2.665E+02, 0.1);
-			ds.AddConstraint(6, -3.036E+02, 0.1);
-			ds.AddConstraint(7, +1.134E+02, 0.1);
+			ds.AddConstraint(4, -7.143E+01, 0.01);
+			ds.AddConstraint(5, +2.324E+02, 0.01);
+			ds.AddConstraint(6, -2.642E+02, 0.01);
+			ds.AddConstraint(7, +9.837E+01, 0.01);
 		}
 
 		if (ds.name == "7TeV")
@@ -289,15 +332,19 @@ void BuildFitFunction(const string fitModel, Dataset &ds)
 			*/
 
 			// test2
-			ds.ff->SetParameters(-3.47, -18.8, -14.9, -4., -26., 40.);
-			//ds.AddConstraint(3, -4.0, 0.1);
-			ds.AddConstraint(4, -24., 3.);
-			ds.AddConstraint(5, 40., 15.);
+			ds.ff->SetParameters(-2.90, -22.55, -23.6, -4.12, -28.9, +58.9);
+
+			//ds.AddConstraint(1, -22.0, 0.5);
+
+			ds.AddConstraint(3, -4.0, 0.1);
+
+			ds.AddConstraint(4, -24., 4.);
+			ds.AddConstraint(5, 40., 20.);
 		}
 
-		if (ds.name.find("7TeV") == 0) ds.ff->SetParameters(-3.31, -25.3, -6.27, -3.62, -22.6, 39.0);
-		if (ds.name.find("8TeV") == 0) ds.ff->SetParameters(-3.24, -30.6, -56.7, -3.50, -22.8, 42.0);
-		if (ds.name.find("13TeV") == 0) ds.ff->SetParameters(-2.70, -33.2, -67.9, -3.03, -20.6, 43.1);
+		if (ds.name.find("7TeV") == 0) ds.ff->SetParameters(-2.62, -24.4, +0.34, -3.62, -24.7, +55.3);
+		if (ds.name.find("8TeV") == 0) ds.ff->SetParameters(-2.23, -27.0, -32.5, -3.49, -19.98, +33.2);
+		if (ds.name.find("13TeV") == 0) ds.ff->SetParameters(-1.70, -29.0, -40.1, -3.03, -22.4, +50.1);
 
 		// do evolution from t1_def to t1
 		const double p0 = ds.ff->GetParameter(0);
