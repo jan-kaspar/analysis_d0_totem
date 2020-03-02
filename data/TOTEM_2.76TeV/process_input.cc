@@ -12,7 +12,7 @@ using namespace std;
 
 //----------------------------------------------------------------------------------------------------
 
-void ProcessOne(const string &inputFile, const string &outputFile, bool highT)
+void ProcessOne(const string &inputFile, const string &outputFile, bool highT, bool attract)
 {
 	// get input
 	FILE *f_in = fopen(inputFile.c_str(), "r");
@@ -41,6 +41,12 @@ void ProcessOne(const string &inputFile, const string &outputFile, bool highT)
 
 		if (r == 6)
 		{
+			if (attract && fabs(t_repr - 0.61) < 0.01)
+			{
+				dsdt_stat_unc /= 5.;
+				dsdt_syst_unc_t_dep /= 5.;
+			}
+
 			const double t_unc = (t_max - t_min) / 2.;
 
 			int idx = g_dsdt->GetN();
@@ -56,13 +62,30 @@ void ProcessOne(const string &inputFile, const string &outputFile, bool highT)
 	// additional steering points
 	/*
 	{
-		int idx = g_dsdt->GetN();
-		g_dsdt->SetPoint(idx, 0.80, 1.70E-2);
+		int idx;
+
+	   	idx = g_dsdt->GetN();
+		g_dsdt->SetPoint(idx, 0.61, 0.85E-2);
+		g_dsdt->SetPointError(idx, 0.01, 0.05E-2);
+		g_dsdt_syst_unc_t_dep->SetPoint(idx, 0., 0.05E-2);
+
+	   	idx = g_dsdt->GetN();
+		g_dsdt->SetPoint(idx, 0.70, 1.30E-2);
+		g_dsdt->SetPointError(idx, 0.01, 0.05E-2);
+		g_dsdt_syst_unc_t_dep->SetPoint(idx, 0., 0.05E-2);
+
+	   	idx = g_dsdt->GetN();
+		g_dsdt->SetPoint(idx, 0.78, 1.55E-2);
+		g_dsdt->SetPointError(idx, 0.01, 0.05E-2);
+		g_dsdt_syst_unc_t_dep->SetPoint(idx, 0., 0.05E-2);
+
+	   	idx = g_dsdt->GetN();
+		g_dsdt->SetPoint(idx, 0.90, 1.15E-2);
 		g_dsdt->SetPointError(idx, 0.01, 0.05E-2);
 		g_dsdt_syst_unc_t_dep->SetPoint(idx, 0., 0.05E-2);
 
 		idx = g_dsdt->GetN();
-		g_dsdt->SetPoint(idx, 0.97, 0.90E-2);
+		g_dsdt->SetPoint(idx, 0.98, 0.85E-2);
 		g_dsdt->SetPointError(idx, 0.01, 0.05E-2);
 		g_dsdt_syst_unc_t_dep->SetPoint(idx, 0., 0.05E-2);
 	}
@@ -155,9 +178,11 @@ void ProcessOne(const string &inputFile, const string &outputFile, bool highT)
 
 int main()
 {
-	ProcessOne("from_preprint_4sigma.txt", "data_4sigma.root", false);
+	ProcessOne("from_preprint_4sigma.txt", "data_4sigma.root", false, false);
 
-	ProcessOne("from_preprint_13sigma.txt", "data.root", true);
+	ProcessOne("from_preprint_13sigma.txt", "data.root", true, false);
+
+	ProcessOne("from_preprint_13sigma.txt", "data_att.root", true, true);
 
 	return 0;
 }
