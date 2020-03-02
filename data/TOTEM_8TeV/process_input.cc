@@ -121,6 +121,7 @@ int main()
 	ProcessOne("ob-1-30-0.10-S/DS4-sc/combined/h_dsdt", "data_b1s.root");
 	ProcessOne("ob-2-20-0.20-S/DS4-sc/combined/h_dsdt", "data_b2s.root");
 	ProcessOne("bt1/DS4-sc/combined/h_dsdt", "data_bt1.root");
+	ProcessOne("bt2/DS4-sc/combined/h_dsdt", "data_bt2.root");
 
 	ProcessOne("ob-1-30-0.10/DS4-sc/45b_56t/h_dsdt", "data_b1_45b_56t.root");
 	ProcessOne("ob-1-30-0.10/DS4-sc/45t_56b/h_dsdt", "data_b1_45t_56b.root");
