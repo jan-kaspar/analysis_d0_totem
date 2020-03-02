@@ -1,68 +1,78 @@
 #!/bin/bash
 
-# models:
+#----------------------------------------------------------------------------------------------------
 
-# t_ranges
-#	"minimal"
-#	"low_t/high_t"
+# defaults
 
-models_ranges=(
-	##"minimal/e012+e012"
-	##"minimal/e01+e012"
-	#"minimal/e012+e02"
-	##"minimal/e01+e02"
-	#"minimal/e01+e023"
-	#"minimal/e01+e023:f=0.05" # default
+models_ranges=()
 
-	#"minimal/e01+e023:f=0.0"
-	#"minimal/e01+e023:f=0.05"
-	#"minimal/e01+e023:f=0.1"
-	#"minimal/e01+e023:f=0.15"
-	#"minimal/e01+e023:f=0.2"
-	#"minimal/e01+e023:f=0.3"
-	#"minimal/e01+e023:f=0.4"
-	#"minimal/e01+e023:f=0.5"
-	#"minimal/e01+e023:f=0.6"
-	#"minimal/e01+e023:f=0.7"
-	#"minimal/e01+e023:f=0.8"
-	#"minimal/e01+e023:f=0.9"
-	#"minimal/e01+e023:f=1.0"
-
-	##"low_t,high_t/e012+e0123"
-	#"low_t,high_t/e012+e023"
-	"low_t,high_t/e012+e023:f=0.2" # default
-
-	#"low_t,high_t/e012+e023:f=0.0"
-	#"low_t,high_t/e012+e023:f=0.05"
-	#"low_t,high_t/e012+e023:f=0.1"
-	#"low_t,high_t/e012+e023:f=0.15"
-	#"low_t,high_t/e012+e023:f=0.2"
-	#"low_t,high_t/e012+e023:f=0.3"
-	#"low_t,high_t/e012+e023:f=0.4"
-	#"low_t,high_t/e012+e023:f=0.5"
-	#"low_t,high_t/e012+e023:f=0.6"
-	#"low_t,high_t/e012+e023:f=0.7"
-	#"low_t,high_t/e012+e023:f=0.8"
-	#"low_t,high_t/e012+e023:f=0.9"
-	#"low_t,high_t/e012+e023:f=1.0"
-
-	#"low_t,high_t/e01-int-e01"
-	#"low_t,high_t/e01-int-e01-on"
-)
-
-#models_ranges=(
-#	"low_t,high_t/e012t0+e0123t0"
-#)
-
-#models_ranges=(
-#	"bootstrap/bootstrap"
-#)
+make_plot_links="n"
 
 uncs=(
 	#"st"
 	#"st+sy"
 	"st+sy+no"
 )
+
+
+#----------------------------------------------------------------------------------------------------
+
+# parse command line
+
+while [ -n "$1" ]
+do
+	case "$1" in
+		"-g")
+				shift
+
+				case "$1" in
+					"std")
+							#models_ranges+=("lt-17,ht/e012+e023:f=0.2")
+							models_ranges+=("lts-100,ht/e012+e023:f=0.4")
+						;;
+
+					"bootstrap")
+							models_ranges+=("bootstrap/bootstrap")
+						;;
+
+					"correlation")
+							base="lts-100,ht/e012+e023"
+							models_ranges+=("$base:f=0.0")
+							models_ranges+=("$base:f=0.1")
+							models_ranges+=("$base:f=0.2")
+							models_ranges+=("$base:f=0.3")
+							models_ranges+=("$base:f=0.4")
+							models_ranges+=("$base:f=0.5")
+							models_ranges+=("$base:f=0.6")
+							models_ranges+=("$base:f=0.7")
+							models_ranges+=("$base:f=0.8")
+							models_ranges+=("$base:f=0.9")
+							models_ranges+=("$base:f=1.0")
+						;;
+
+					*)
+							echo "ERROR: unknown group $1"
+							exit 1
+						;;
+				esac
+			;;
+
+		"-plots")
+				make_plot_links="y"
+			;;
+
+		-*)
+				echo "ERROR: unknown option $1"
+				exit 2
+			;;
+
+		*)
+				models_ranges+=("$1")
+			;;
+	esac
+
+	shift
+done
 
 #----------------------------------------------------------------------------------------------------
 
@@ -75,7 +85,6 @@ function RunOne()
 	mkdir -p "$dir"
 
 	# make plot links
-	make_plot_links="n"
 	if [ "$make_plot_links" == "y" ]
 	then
 		rm -rf "$dir/plots"
