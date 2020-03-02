@@ -7,7 +7,13 @@ string top_dir = "../../";
 
 string methods[];
 //methods.push("minimal");
-methods.push("low_t,high_t");
+
+methods.push("lt-17,ht");
+methods.push("lt-30,ht");
+
+methods.push("lts-10,ht");
+methods.push("lts-50,ht");
+methods.push("lts-100,ht");
 
 string quantities[], q_labels[];
 quantities.push("t_min"); q_labels.push("$t_{\rm min}\ung{GeV^2}$");
@@ -30,7 +36,7 @@ for (int mi : methods.keys)
 		NewPad("$\sqrt s\ung{GeV}$", q_labels[qi]);
 		scale(Log, Linear);
 
-		string f = top_dir + "t_ranges/t_investigation_new.root";
+		string f = top_dir + "t_ranges/t_investigation.root";
 		RootObject graph = RootGetObject(f, methods[mi] + "/g_" + quantities[qi] + "_vs_sqrt_s");
 		RootObject fit_lin = RootGetObject(f, methods[mi] + "/g_" + quantities[qi] + "_vs_sqrt_s|ff_lin");
 		RootObject fit_log = RootGetObject(f, methods[mi] + "/g_" + quantities[qi] + "_vs_sqrt_s|ff_log");

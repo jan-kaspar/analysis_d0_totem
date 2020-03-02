@@ -1,15 +1,12 @@
 import root;
 import pad_layout;
 
-include "../templates/common_code.asy";
+include "common_code.asy";
 
-string topDir = "../../";
+string topDir = "../";
 
 string results[];
-//results.push("minimal/e01+e023:f=0.05/st+sy");
-//results.push("low_t,high_t/e012+e023:f=0.2/st+sy+no");
-
-results.push("lts-100,ht/e012+e023:f=0.4/st+sy+no");
+results.push(".");
 
 string extModel = "sqrt_s";
 string extFit = "corr";
@@ -21,18 +18,12 @@ for (int ri : results.keys)
 {
 	NewRow();
 
-	string l = "\vbox{\SetFontSizesXX";
-	for (string e : split(results[ri], "/"))
-		l += "\hbox{" + replace(e, "_", "\_") + "}";
-	l += "}";
-	NewPadLabel(l);
-	
 	NewPad("$|t|\ung{GeV^2}$", "$\d\si/\d t\ung{mb/GeV}$");
 	scale(Linear, Log);
 
 	AddToLegend("<predictions of $s$-dependent model");
 	
-	string f = topDir + "fits/" + results[ri] + "/s_extrapolation.root";
+	string f = topDir + results[ri] + "/s_extrapolation.root";
 
 	for (int dsi : datasets.keys)
 	{

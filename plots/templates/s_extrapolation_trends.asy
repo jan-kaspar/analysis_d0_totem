@@ -1,15 +1,12 @@
 import root;
 import pad_layout;
 
-include "../templates/common_code.asy";
+include "common_code.asy";
 
-string topDir = "../../";
+string topDir = "../";
 
 string results[];
-//results.push("minimal/e01+e023:f=0.05/st+sy");
-//results.push("low_t,high_t/e012+e023:f=0.2/st+sy+no");
-
-results.push("lts-100,ht/e012+e023:f=0.4/st+sy+no");
+results.push(".");
 
 string extModel = "sqrt_s";
 string extFit = "corr";
@@ -35,7 +32,7 @@ for (int ri : results.keys)
 
 		// draw extrapolation
 		AddToLegend("<extraplation to D0 energy:");
-		string f = topDir + "fits/" + results[ri] + "/s_extrapolation.root";
+		string f = topDir + results[ri] + "/s_extrapolation.root";
 		string base = extModel + "/" + extFit;
 		draw(RootGetObject(f, base + "/g_dsdt_ext"), "l", black, "central");
 		draw(RootGetObject(f, base + "/unc c/g_dsdt_ext_pl_unc"), "l", black+dashed, "uncertainty");
@@ -43,7 +40,7 @@ for (int ri : results.keys)
 
 		// draw input
 		AddToLegend("<input for extrapolation:");
-		string f = topDir + "fits/" + results[ri] + "/do_fits.root";
+		string f = topDir + results[ri] + "/do_fits.root";
 		for (int dsi : datasets.keys)
 		{
 			pen p = StdPen(dsi + 1);

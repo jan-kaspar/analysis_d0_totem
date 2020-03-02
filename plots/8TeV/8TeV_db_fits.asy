@@ -7,6 +7,8 @@ TGraph_errorBar = None;
 
 xSizeDef = 7cm;
 
+f = "../..//fits/low_t,high_t/e012+e023:f=0.2/st+sy+no/do_fits.root";
+
 //----------------------------------------------------------------------------------------------------
 
 void DrawUncBand(RootObject g_cen, RootObject g_unc, pen p = yellow)
@@ -63,7 +65,8 @@ void DrawRelUncBand(RootObject g_cen, RootObject g_unc, RootObject g_fit, pen p 
 //----------------------------------------------------------------------------------------------------
 
 for (int dsi : datasets.keys)
-	NewPadLabel(d_labels[dsi]);
+	//NewPadLabel(d_labels[dsi]);
+	NewPadLabel(datasets[dsi]);
 
 //----------------------------------------------------------------------------------------------------
 
@@ -96,8 +99,8 @@ for (int dsi : datasets.keys)
 	NewPad("$|t|\ung{GeV^2}$", "$\d\si/\d t\ung{mb/GeV^2}$");
 	scale(Linear, Log);
 
-	//TGraph_x_min = t_min;
-	//TGraph_x_max = t_max;
+	TGraph_x_min = t_min;
+	TGraph_x_max = t_max;
 
 	DrawUncBand(g_dsdt, g_dsdt_syst_full, yellow);
 	DrawUncBand(g_dsdt, g_dsdt_syst_t_dep, heavygreen);
@@ -108,7 +111,7 @@ for (int dsi : datasets.keys)
 
 	draw(g_dsdt, "p", blue, mCi+0.5pt);
 
-	limits((0.2, 4e-3), (1.01, 3e0), Crop);
+	limits((0.3, 4e-3), (0.95, 5e-1), Crop);
 
 	AddToLegend("<$\ch^2/\hbox{ndf} = " + format("%#.1f / (", chi2) + format("%.0f", n_fit_points) + format(" - %.0f)", n_fit_points - ndf) + format(" = %#.1f$", chi2_ndf));
 	AddToLegend(format("<$\hbox{p-value} = %#.1f\un{\%}$", p_value * 100.));
@@ -117,7 +120,6 @@ for (int dsi : datasets.keys)
 
 	AttachLegend(BuildLegend(vSkip=-1mm));
 }
-
 
 //----------------------------------------------------------------------------------------------------
 NewRow();
@@ -181,7 +183,7 @@ for (int dsi : datasets.keys)
 	draw(gr_fit_pl_unc, red+dashed);
 	draw(gr_fit_mi_unc, red+dashed);
 
-	xlimits(0.3, 1.01, Crop);
+	xlimits(0.3, 0.95, Crop);
 }
 
 //----------------------------------------------------------------------------------------------------

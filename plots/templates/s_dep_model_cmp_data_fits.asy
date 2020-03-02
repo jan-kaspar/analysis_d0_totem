@@ -1,15 +1,12 @@
 import root;
 import pad_layout;
 
-include "../templates/common_code.asy";
+include "common_code.asy";
 
-string topDir = "../../";
+string topDir = "../";
 
 string results[];
-//results.push("minimal/e01+e023:f=0.05/st+sy");
-//results.push("low_t,high_t/e012+e023:f=0.2/st+sy+no");
-
-results.push("lts-100,ht/e012+e023:f=0.4/st+sy+no");
+results.push(".");
 
 string extModel = "sqrt_s";
 string extFit = "corr";
@@ -41,12 +38,12 @@ for (int ri : results.keys)
 		NewPad("$|t|\ung{GeV^2}$", "$\d\si/\d t\ung{mb/GeV}$");
 		scale(Linear, Log);
 
-		string f = topDir + "fits/" + results[ri] + "/do_fits.root";
+		string f = topDir + results[ri] + "/do_fits.root";
 		draw(RootGetObject(f, datasets[dsi] + "/g_fit"), "l", blue, "$\d\si/\d t$ fit");
 		draw(RootGetObject(f, datasets[dsi] + "/g_fit_pl_unc"), "l", blue+dashed);
 		draw(RootGetObject(f, datasets[dsi] + "/g_fit_mi_unc"), "l", blue+dashed);
 
-		string f = topDir + "fits/" + results[ri] + "/s_extrapolation.root";
+		string f = topDir + results[ri] + "/s_extrapolation.root";
 		string base = extModel + "/" + extFit + "/" + datasets[dsi];
 		draw(RootGetObject(f, base + "/g_dsdt_ext"), "l", red, "parameter $s$-evolution");
 

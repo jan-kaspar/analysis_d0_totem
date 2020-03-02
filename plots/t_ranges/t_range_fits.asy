@@ -7,9 +7,13 @@ string top_dir = "../../";
 
 string methods[];
 //methods.push("minimal");
-//methods.push("low_t");
-//methods.push("high_t");
-methods.push("low_t,high_t");
+
+methods.push("lt-17,ht");
+methods.push("lt-30,ht");
+
+//methods.push("lts-10,ht");
+methods.push("lts-50,ht");
+methods.push("lts-100,ht");
 
 TGraph_errorBar = None;
 
@@ -31,7 +35,7 @@ for (int mi : methods.keys)
 
 	for (int dsi : datasets.keys)
 	{
-		string f = top_dir + "t_ranges/t_investigation_new.root";
+		string f = top_dir + "t_ranges/t_investigation.root";
 		RootObject g_dsdt = RootGetObject(f, methods[mi] + "/" + datasets[dsi] + "/g_dsdt");
 		RootObject g_fit = RootGetObject(f, methods[mi] + "/" + datasets[dsi] + "/g_fit");
 		RootObject g_data = RootGetObject(f, methods[mi] + "/" + datasets[dsi] + "/g_data");
@@ -64,7 +68,7 @@ for (int mi : methods.keys)
 		filldraw(Scale((t_dip - t_dip_unc, dsdt_dip * f_y_dw))--Scale((t_dip + t_dip_unc, dsdt_dip * f_y_dw))
 			--Scale((t_dip + t_dip_unc, dsdt_dip * f_y_up))--Scale((t_dip - t_dip_unc, dsdt_dip * f_y_up))--cycle, red+opacity(0.3), nullpen);
 		draw(Scale((t_dip, dsdt_dip * f_y_dw))--Scale((t_dip, dsdt_dip * f_y_up)), red+1.3pt);
-		draw(Scale((t_dip + dt_dw, dsdt_dip))--Scale((t_dip + dt_up, dsdt_dip)), red+1.3pt);
+		draw(Scale((t_min + dt_up, dsdt_dip))--Scale((t_bmp + dt_dw, dsdt_dip)), red+1.3pt);
 
 		filldraw(Scale((t_bmp - t_bmp_unc, dsdt_bmp * f_y_dw))--Scale((t_bmp + t_bmp_unc, dsdt_bmp * f_y_dw))
 			--Scale((t_bmp + t_bmp_unc, dsdt_bmp * f_y_up))--Scale((t_bmp - t_bmp_unc, dsdt_bmp * f_y_up))--cycle, heavygreen+opacity(0.3), nullpen);
@@ -74,12 +78,13 @@ for (int mi : methods.keys)
 		filldraw(Scale((t_max - t_max_unc, dsdt_max * f_y_dw))--Scale((t_max + t_max_unc, dsdt_max * f_y_dw))
 			--Scale((t_max + t_max_unc, dsdt_max * f_y_up))--Scale((t_max - t_max_unc, dsdt_max * f_y_up))--cycle, magenta+opacity(0.3), nullpen);
 		draw(Scale((t_max, dsdt_max * f_y_dw))--Scale((t_max, dsdt_max * f_y_up)), magenta+1.3pt);
-		draw(Scale((t_bmp + dt_dw, dsdt_max))--Scale((t_max + dt_up, dsdt_max)), magenta+1.3pt);
+		draw(Scale((t_bmp + dt_up, dsdt_max))--Scale((t_max + dt_up, dsdt_max)), magenta+1.3pt);
 
 		draw(g_fit, "l", black+1pt);
 		draw(g_dsdt, "p", blue, mCi+0.5pt);
 
-		limits((t_min-0.05, dsdt_dip*0.7), (t_max+0.05, dsdt_min*1.5), Crop);
+		//limits((t_min-0.05, dsdt_dip*0.7), (t_max+0.05, dsdt_min*1.5), Crop);
+		limits((0.2, 5e-3), (1.0, 3e0), Crop);
 	}
 }
 

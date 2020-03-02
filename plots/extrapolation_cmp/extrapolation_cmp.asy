@@ -10,7 +10,9 @@ pen r_pens[];
 //results.push("minimal/e01+e023:f=0.05/st+sy"); r_pens.push(blue);
 
 //results.push("low_t,high_t/e012+e023:f=0.5/st+sy"); r_pens.push(red+dashed);
-results.push("low_t,high_t/e012+e023:f=0.2/st+sy+no"); r_pens.push(red);
+//results.push("low_t,high_t/e012+e023:f=0.2/st+sy+no"); r_pens.push(red);
+
+results.push("lts-100,ht/e012+e023:f=0.4/st+sy+no"); r_pens.push(red);
 
 string extModel = "sqrt_s";
 string extFit = "corr";
