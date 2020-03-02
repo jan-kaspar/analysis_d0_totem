@@ -61,8 +61,13 @@ void LoadInput(const Dataset &ds, InputData &id, bool useCheckFile = false)
 	// adjust t_min cut
 	double t_min_eff = ds.t_min;
 
+	/*
 	if (ds.name.find("2.76TeV") != string::npos)
 		t_min_eff = 0.35;
+
+	if (ds.name.find("8TeV") != string::npos)
+		t_min_eff = 0.32;
+	*/
 
 	// get bin data
 	int idx_min = 100000, idx_max = -1000000;
@@ -74,7 +79,7 @@ void LoadInput(const Dataset &ds, InputData &id, bool useCheckFile = false)
 		bd.dsdt = g_dsdt->GetY()[i];
 		bd.dsdt_unc_stat = g_dsdt->GetErrorY(i);
 
-		if (bd.t < t_min_eff || bd.t > ds.t_max)
+		if (bd.t + bd.t_unc < t_min_eff || bd.t > ds.t_max)
 			continue;
 
 		idx_min = min(i, idx_min);
